@@ -5,18 +5,17 @@ import logging
 import time
 import requests
 from weibo import Client
-import urllib, httplib
 from datetime import datetime, timedelta
 
 log = logging.getLogger(__name__)
-
 
 # Error code for weibo api
 # 10022   IP requests out of rate limit
 # 10023   User requests out of rate limit
 # 10024   User requests for (%s) out of rate limit
 
-def catch_conn_reset(f):
+
+def catch_conn_reset(fun):
     """
     A decorator to handle connection reset errors even ones from pyOpenSSL
     until https://github.com/edsu/twarc/issues/72 is resolved
@@ -29,10 +28,10 @@ def catch_conn_reset(f):
 
     def new_f(self, *args, **kwargs):
         try:
-            return f(self, *args, **kwargs)
+            return fun(self, *args, **kwargs)
         except ConnError:
             self._connect()
-            return f(self, *args, **kwargs)
+            return fun(self, *args, **kwargs)
 
     return new_f
 
@@ -43,17 +42,40 @@ class Weibowarc(object):
     get data from the friendships API.
     """
 
-    def __init__(self, api_key, api_secret, redirect_uri, authorization_code):
+    def __init__(self, api_key, api_secret, redirect_uri, token):
         """
-        Instantiate a Weibowarc instance. Make sure your environment variables
+        Instantiate a Weibowarc instance. Make sure your  variables
         are set.
         """
 
         self.api_key = api_key
         self.api_secret = api_secret
         self.redirect_uri = redirect_uri
-        self.authorization_code = authorization_code
+        self.access_token = token
         self._connect()
+
+    def search_friends_list(self):
+        """
+        Try to get the all the users followed by the current user, but it only returns
+        30% of users haven't give right to the application
+        :return:
+        """
+        logging.info("starting search for friend.")
+        friends_url = "friendships/friends"
+
+        params = {'count': 100}
+
+        params['uid'] = self.user_id()[u'uid']
+
+        resp = self.get(friends_url, **params)
+        statuses = resp[u'users']
+
+        if len(statuses) == 0:
+            logging.info("no new weibo friendlist matching %s", params)
+            return
+
+        for status in statuses:
+            yield status
 
     def search_friendships(self, max_id=None, since_id=None):
         """
@@ -65,25 +87,33 @@ class Weibowarc(object):
         logging.info("starting search for max_id:%s, since_id:%s.", max_id, since_id)
         friendships_url = "statuses/friends_timeline"
         params = {
-            "count": 100
+            'count': 100,
+            'page': 1
         }
-
+        # count the number of post in first page
+        page_count = 0
         while True:
             if since_id:
                 params['since_id'] = since_id
             if max_id:
                 params['max_id'] = max_id
+            if page_count > 100:
+                params['page'] = 2
+                #time.sleep(2)
 
-            statuses = self.get(friendships_url, params=params)
+            resp = self.get(friendships_url, **params)
+            statuses = resp[u'statuses']
 
             if len(statuses) == 0:
                 logging.info("no new weibo post matching %s", params)
                 break
 
             for status in statuses:
+                page_count += 1
                 yield status
 
-            max_id = str(int(status["mid"]) - 1)
+            max_id = str(int(status[u'mid']) - 1)
+
 
     @catch_conn_reset
     def get(self, *args, **kwargs):
@@ -122,7 +152,15 @@ class Weibowarc(object):
         check if the access_token is expired now
         :return:
         """
-        return not self.access_token or self.client.alive()
+        return not self.access_token or not self.client.alive()
+
+    def user_id(self):
+        """
+        To get the current user id
+        http://open.weibo.com/wiki/2/account/get_uid
+        """
+        res = self.get('account/get_uid')
+        return res
 
     def rate_limit(self):
         """
@@ -138,6 +176,7 @@ class Weibowarc(object):
         """
         If a rate limit error is encountered we will sleep until we can
         issue the API call again.
+        refer https://github.com/ghostrong/weibo-crawler/blob/master/example.py
         """
         try:
             rl = self.rate_limit()
@@ -148,6 +187,7 @@ class Weibowarc(object):
             if rl['remaining_ip_hits'] > 1 and rl['remaining_user_hits'] > 1:
                 return 1
             return rl['reset_time_in_seconds'] + 1
+
         now = datetime.now()
         reset = now + timedelta(seconds=3600 - now.minute * 60 - now.second)
         reset_ts = time.mktime(datetime.timetuple(reset))
@@ -155,14 +195,9 @@ class Weibowarc(object):
 
     def _connect(self):
         logging.info("creating client session")
-        if self.isTokenExpired():
-            self.client = Client(app_key=self.api_key,
-                                 app_secret=self.api_secret,
-                                 redirect_uri=self.redirect_uri,
-                                 token=self.access_token)
-        else:
-            self.client = Client(app_key=self.api_key,
-                                 app_secret=self.api_secret,
-                                 redirect_uri=self.redirect_uri)
-            self.client.set_code(authorization_code=self.authorization_code)
-            self.access_token = self.client.token
+        self.client = Client(api_key=self.api_key,
+                             api_secret=self.api_secret,
+                             redirect_uri=self.redirect_uri,
+                             token=self.access_token)
+
+
