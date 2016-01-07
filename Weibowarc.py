@@ -196,8 +196,8 @@ class Weibowarc(object):
     def _connect(self):
         logging.info("creating client session")
         self.client = Client(api_key=self.api_key,
-                             api_secret=self.api_secret,
-                             redirect_uri=self.redirect_uri,
-                             token=self.access_token)
+                         api_secret=self.api_secret,
+                         redirect_uri=self.redirect_uri,
+                         token=self.access_token)
 
 

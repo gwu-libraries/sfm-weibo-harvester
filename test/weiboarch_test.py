@@ -4,20 +4,18 @@ from Weibowarc import Weibowarc
 import logging
 import time
 
-api_key = '3252156855'
-api_secret = '4c6f6c568ad9ef6b6a81c42b172707b1'
-redirect_uri = 'https://www.google.com/'
-token={u'access_token': u'2.00kQCxKGpYiFYDc41039481c0wvwei',
-       u'remind_in': u'157679999', u'uid': u'5658630430',
-       u'expires_at': 1609785214}
+API_KEY = ''
+API_SECRET = ''
+REDIRECT_URL = ''
+ACCESS_TOKEN = ''
 
-weibotest = Weibowarc(api_key, api_secret, redirect_uri, token)
+weibotest = Weibowarc(api_key=API_KEY, api_secret=API_SECRET, redirect_uri=REDIRECT_URL, token=ACCESS_TOKEN)
 
 logging.basicConfig(filename="test.log", level=logging.INFO)
 
 
 def test_get_friendship():
-    count=0
+    count = 0
     for weibo in weibotest.search_friendships():
         assert weibo[u'mid']
         count += 1
@@ -28,7 +26,7 @@ def test_get_friendship():
 
 
 def test_since_id():
-    count=0
+    count = 0
     for weibo in weibotest.search_friendships():
         mid = weibo[u'mid']
         count += 1
@@ -38,7 +36,7 @@ def test_since_id():
     assert mid
     time.sleep(5)
 
-    count=0
+    count = 0
     for weibo in weibotest.search_friendships(since_id=id):
         print 'new_id [%s], pre_id [%s]' % (weibo[u'mid'], mid)
         assert weibo[u'mid'] > mid
@@ -111,6 +109,7 @@ def test_friends_list_all():
 
     assert count == len(users)
 
+test_get_friendship()
 # test_get_friendship()
 # test_since_id()
 # test_max_and_since_ids()
