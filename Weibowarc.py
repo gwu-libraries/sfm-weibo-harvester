@@ -9,6 +9,7 @@ from datetime import datetime, timedelta
 
 log = logging.getLogger(__name__)
 
+
 # Error code for weibo api
 # 10022   IP requests out of rate limit
 # 10023   User requests out of rate limit
@@ -99,9 +100,10 @@ class Weibowarc(object):
                 params['max_id'] = max_id
             if page_count > 100:
                 params['page'] = 2
-                #time.sleep(2)
+                # time.sleep(2)
 
             resp = self.get(friendships_url, **params)
+            #print resp
             statuses = resp[u'statuses']
 
             if len(statuses) == 0:
@@ -110,10 +112,14 @@ class Weibowarc(object):
 
             for status in statuses:
                 page_count += 1
+                """
+                the application level need deal the retweeted text.
+                if u'retweeted_status' in status and status[u'retweeted_status'] is not None:
+                    yield status[u'retweeted_status']
+                """
                 yield status
 
             max_id = str(int(status[u'mid']) - 1)
-
 
     @catch_conn_reset
     def get(self, *args, **kwargs):
@@ -196,8 +202,6 @@ class Weibowarc(object):
     def _connect(self):
         logging.info("creating client session")
         self.client = Client(api_key=self.api_key,
-                         api_secret=self.api_secret,
-                         redirect_uri=self.redirect_uri,
-                         token=self.access_token)
-
-
+                             api_secret=self.api_secret,
+                             redirect_uri=self.redirect_uri,
+                             token=self.access_token)

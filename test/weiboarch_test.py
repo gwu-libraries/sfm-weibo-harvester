@@ -18,6 +18,9 @@ def test_get_friendship():
     count = 0
     for weibo in weibotest.search_friendships():
         assert weibo[u'mid']
+        # testing the retweeted
+        if u'retweeted_status' in weibo and weibo[u'retweeted_status'] is not None:
+            assert weibo[u'retweeted_status'][u'mid']
         count += 1
         if count == 100:
             break
@@ -81,7 +84,7 @@ def test_page():
     # pages are 100 weibo post but total we can get 150
     count = 0
     for weibo in weibotest.search_friendships():
-        #print ("[%s],[%s],%s,%s" % (weibo[u'created_at'], weibo[u'id'], weibo[u'user'][u'screen_name'], weibo[u'text']))
+        # print ("[%s],[%s],%s,%s" % (weibo[u'created_at'], weibo[u'id'], weibo[u'user'][u'screen_name'], weibo[u'text']))
         count += 1
         if count == 150:
             break
@@ -108,6 +111,7 @@ def test_friends_list_all():
             count += 1
 
     assert count == len(users)
+
 
 test_get_friendship()
 # test_get_friendship()

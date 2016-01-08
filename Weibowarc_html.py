@@ -48,12 +48,20 @@ class WeibowarcHtml(object):
 
     def follow_users(self, uids):
         """
-        Try to follow the special uid in the html ways,But it won't work
+        Try to follow the special uid in the html ways.But it won't work!!, it needs the access code verification
+        --Testing function--
         :return:
         """
         for uid in uids:
-            follow_url = 'http://weibo.cn/attention/add?uid='+uid+'&rl=0&st=c93ac1'
-            res = self.session.post(follow_url, data={})
+            follow_url = 'http://weibo.cn/attention/add'
+            data = {"uid": uid,
+                      'rl': 0,
+                      }
+            headers = {
+                'Referer': 'http://weibo.cn/' + uid+'follow',
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+            res = self.session.post(url=follow_url, data=data, headers=headers)
             page_text = res.text
             print page_text
             self._assert_error(res)
@@ -83,7 +91,7 @@ class WeibowarcHtml(object):
         follow_url = "http://weibo.cn/" + self.uid + "/follow?vt=4"
         follow_page = self.session.get(follow_url)
         page_num = self.get_max_list_num(follow_page.text)
-        url_len = range(1, page_num+1)
+        url_len = range(1, page_num + 1)
         for n in url_len:
             follow_url = "http://weibo.cn/" + self.uid + "/follow?page=" + str(n)
             if n != 1:
@@ -104,11 +112,11 @@ class WeibowarcHtml(object):
         page_num = self.get_max_list_num(keyword_page.text)
         if max_page_num and (page_num > max_page_num):
             page_num = max_page_num
-        url_len = range(1, page_num+1)
+        url_len = range(1, page_num + 1)
         for n in url_len:
             keyword_url = "http://weibo.cn/search/mblog?hideSearchFrame=&keyword=" + key_word + "&page=" + str(n)
             if n != 1:
-                 keyword_page = self.session.get(keyword_url)
+                keyword_page = self.session.get(keyword_url)
             soup_list = BeautifulSoup(keyword_page.text, "html.parser")
             for tag in soup_list.find_all("span"):
                 soup_tmp = BeautifulSoup(str(tag).decode('utf-8'), 'html.parser')
