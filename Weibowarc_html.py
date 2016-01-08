@@ -10,7 +10,7 @@ log = logging.getLogger(__name__)
 
 class WeibowarcHtml(object):
     """
-    Weibowarcpage allows you to login weibo to mobile page using
+    WeibowarcHtml allows you to login weibo to mobile page using
     the username, password. Getting the whole friendship of the login user.
     refer from  https://github.com/wangdashuaihenshuai/weibo/blob/master/weibo.py
     """
@@ -68,7 +68,6 @@ class WeibowarcHtml(object):
         try:
             max_num = 1
             for value in soup_list.select('input[name="mp"]'):
-                print value
                 max_num = value["value"]
         except AttributeError, e:
             logging.error("caught attribute error %s", e)
@@ -93,8 +92,31 @@ class WeibowarcHtml(object):
             for tag in soup_list.find_all("tr"):
                 yield tag.td.next_sibling.a.string
 
+    def search_word(self, key_word, max_page_num=None):
+        """
+        To get the full pages of the keyword, it has a problem that the first one or two results
+        can't analyze since the keyword page not get the original text
+        :return:
+        """
+        logging.info("Starting get the results of %s", key_word)
+        keyword_url = "http://weibo.cn/search/mblog?hideSearchFrame=&keyword=" + key_word
+        keyword_page = self.session.get(keyword_url)
+        page_num = self.get_max_list_num(keyword_page.text)
+        if max_page_num and (page_num > max_page_num):
+            page_num = max_page_num
+        url_len = range(1, page_num+1)
+        for n in url_len:
+            keyword_url = "http://weibo.cn/search/mblog?hideSearchFrame=&keyword=" + key_word + "&page=" + str(n)
+            if n != 1:
+                 keyword_page = self.session.get(keyword_url)
+            soup_list = BeautifulSoup(keyword_page.text, "html.parser")
+            for tag in soup_list.find_all("span"):
+                soup_tmp = BeautifulSoup(str(tag).decode('utf-8'), 'html.parser')
+                if tag['class'] == [u'ctt']:
+                    yield tag.parent.a.string + ',' + soup_tmp.get_text()[1:]
+
     def _assert_error(self, d):
-        """Assert if json response is error.
+        """Assert if  response is error.
         """
         if 'error_code' in d and 'error' in d:
             raise RuntimeError("{0} {1}".format(

@@ -17,7 +17,12 @@ def get_list_test():
     assert count == 6
 
 
+def search_keyword():
+    count = 0
+    for followers in WeiboHtmlTest.search_word(key_word=u'郭德纲', max_page_num=10):
+        print followers
+
+
 def follow_test():
     users_id = {'1646697350'}
     WeiboHtmlTest.follow_users(uids=users_id)
-
