@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 from Weibowarc_html import WeibowarcHtml
 
-USERNAME = '17090888875'
-PASSWORD = 'beijing'
+USERNAME = ''
+PASSWORD = ''
 
 WeiboHtmlTest = WeibowarcHtml(username=USERNAME, password=PASSWORD)
 
@@ -24,18 +24,12 @@ def search_keyword():
 
 
 def follow_test():
-    users_id = ['5576276117', '5789331626', '5762461926', '5817859794', '5822897960', '5000726243',
-                '1171284121', '5819333684', '5280878510', '2846143823', '2357356234', '3305085281',
-                '5680985239', '1907166177', '5357651574', '2873365222', '1789715862', '2099437882',
-                '5764871471', '3609443587']
+    users_id = []
     WeiboHtmlTest.follow_users(uids=users_id)
 
 
 def unfollow_test():
-    users_id = ['5576276117', '5789331626', '5762461926', '5817859794', '5822897960', '5000726243',
-                '1171284121', '5819333684', '5280878510', '2846143823', '2357356234', '3305085281',
-                '5680985239', '1907166177', '5357651574', '2873365222', '1789715862', '2099437882',
-                '5764871471', '3609443587']
+    users_id = []
     WeiboHtmlTest.unfollow_users(uids=users_id)
 
 #follow_test()
