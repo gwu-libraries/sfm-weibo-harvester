@@ -3,6 +3,7 @@
 
 import logging
 import requests
+import time
 from bs4 import BeautifulSoup
 
 log = logging.getLogger(__name__)
@@ -48,22 +49,19 @@ class WeibowarcHtml(object):
 
     def follow_users(self, uids):
         """
-        Try to follow the special uid in the html ways.But it won't work!!, it needs the access code verification
+        Try to follow the special uid in the html ways.
         --Testing function--
         :return:
         """
         for uid in uids:
-            follow_url = 'http://weibo.cn/attention/add'
-            data = {"uid": uid,
-                      'rl': 0,
-                      }
+            follow_url = 'http://weibo.cn/attention/add?uid='+uid+'&rl=0&st=d56522'
             headers = {
-                'Referer': 'http://weibo.cn/' + uid+'follow',
-                'Content-Type': 'application/x-www-form-urlencoded'
+                'Referer': 'http://weibo.cn/u/' + uid,
+                'Content-Type': 'application/x-www-form-urlencoded',
             }
-            res = self.session.post(url=follow_url, data=data, headers=headers)
-            page_text = res.text
-            print page_text
+            res = self.session.get(url=follow_url, headers=headers)
+            # slow down the follow speed
+            time.sleep(0.2)
             self._assert_error(res)
 
     def get_max_list_num(self, page_text):
