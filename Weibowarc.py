@@ -1,19 +1,168 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import os
+import sys
 import logging
 import time
+import json
 import requests
 from weibo import Client
+import argparse
 from datetime import datetime, timedelta
 
-log = logging.getLogger(__name__)
+try:
+    import configparser  # Python 3
+except ImportError:
+    import ConfigParser as configparser  # Python 2
+
+if sys.version_info[:2] <= (2, 7):
+    # Python 2
+    get_input = raw_input
+else:
+    # Python 3
+    get_input = input
 
 
 # Error code for weibo api
 # 10022   IP requests out of rate limit
 # 10023   User requests out of rate limit
 # 10024   User requests for (%s) out of rate limit
+
+def main():
+    """
+    The testing command line for the weibo warc
+    :return:
+    """
+
+    parser = argparse.ArgumentParser("weibowarc")
+    parser.add_argument('-s', '--stimeline', action='store_true', required=True,
+                        help="search for weibo in friends timeline")
+    parser.add_argument("--max_id", dest="max_id",
+                        help="maximum weibo id to search for")
+    parser.add_argument("--since_id", dest="since_id",
+                        help="smallest id to search for")
+    parser.add_argument("--log", dest="log",
+                        default="weibowarc.log", help="log file")
+    parser.add_argument("--api_key",
+                        default=None, help="Weibo API key")
+    parser.add_argument("--api_secret",
+                        default=None, help="Weibo API secret")
+    parser.add_argument("--redirect_uri",
+                        default=None, help="Weibo API redirect url")
+    parser.add_argument("--access_token",
+                        default=None, help="Weibo API access_token")
+    parser.add_argument('-c', '--config',
+                        default=default_config_filename(),
+                        help="Config file containing Weibo keys and secrets")
+    parser.add_argument('-p', '--profile', default='main',
+                        help="Name of a profile in your configuration file")
+    parser.add_argument('-w', '--warnings', action='store_true',
+                        help="Include warning messages in output")
+
+    args = parser.parse_args()
+
+    logging.basicConfig(
+        filename=args.log,
+        level=logging.INFO,
+        format="%(asctime)s %(levelname)s %(message)s"
+    )
+
+    # get the api key
+    api_key = args.api_key or os.environ.get('API_KEY')
+    api_secret = args.api_secret or os.environ.get('API_SECRET')
+    redirect_uri = args.redirect_uri or os.environ.get('REDIRECT_URL')
+    access_token = args.access_token or os.environ.get("ACCESS_TOKEN")
+
+    if not (api_key and api_secret and
+                redirect_uri and access_token):
+        credentials = load_config(args.config, args.profile)
+        if credentials:
+            api_key = credentials['api_key']
+            api_secret = credentials['api_secret']
+            redirect_uri = credentials['redirect_uri']
+            access_token = credentials['access_token']
+        else:
+            print("Please enter weibo authentication credentials")
+            api_key = get_input('api key: ')
+            api_secret = get_input('api secret: ')
+            redirect_uri = get_input('redirect_uri: ')
+            access_token = get_input('access_token: ')
+            save_keys(args.profile, api_key, api_secret,
+                      redirect_uri, access_token)
+
+    print api_key,api_secret,redirect_uri,access_token
+
+    weibowarc = Weibowarc(api_key=api_key,
+                          api_secret=api_secret,
+                          redirect_uri=redirect_uri,
+                          access_token=access_token)
+
+    if args.stimeline:
+        weibos = weibowarc.search_friendships(since_id=args.since_id, max_id=args.max_id)
+    else:
+        raise argparse.ArgumentTypeError("must do search supply : --search ")
+
+     # iterate through the tweets and write them to stdout
+    for weibo in weibos:
+        # include warnings in output only if they asked for it
+        if u'mid' in weibo or args.warnings:
+            print(json.dumps(weibo))
+
+        # add some info to the log
+        if u'mid' in weibo:
+            logging.info("archived weibo [%s]:[%s]", weibo[u'user'][u'screen_name'], weibo[u"mid"])
+        else:
+            logging.warn(json.dumps(weibo))
+
+
+def save_config(filename, profile,
+                api_key, api_secret,
+                redirect_uri, access_token):
+    config = configparser.ConfigParser()
+    config.add_section(profile)
+    config.set(profile, 'api_key', api_key)
+    config.set(profile, 'api_secret', api_secret)
+    config.set(profile, 'redirect_uri', redirect_uri)
+    config.set(profile, 'access_token', access_token)
+    with open(filename, 'w') as config_file:
+        config.write(config_file)
+
+
+def save_keys(profile, api_key, api_secret,
+              redirect_uri, access_token):
+    """
+    Save keys to ~/.weibowarc
+    """
+    filename = default_config_filename()
+    save_config(filename, profile,
+                api_key, api_secret,
+                redirect_uri, access_token)
+    print("Keys saved to", filename)
+
+
+def load_config(filename, profile):
+    if not os.path.isfile(filename):
+        return None
+    config = configparser.ConfigParser()
+    config.read(filename)
+    data = {}
+    for key in ['access_token', 'redirect_uri', 'api_key', 'api_secret']:
+        try:
+            data[key] = config.get(profile, key)
+        except configparser.NoSectionError:
+            sys.exit("no such profile %s in %s" % (profile, filename))
+        except configparser.NoOptionError:
+            sys.exit("missing %s from profile %s in %s" % (key, profile, filename))
+    return data
+
+
+def default_config_filename():
+    """
+    Return the default filename for storing Weibo keys.
+    """
+    home = os.path.expanduser("~")
+    return os.path.join(home, ".weibowarc")
 
 
 def catch_conn_reset(fun):
@@ -43,7 +192,7 @@ class Weibowarc(object):
     get data from the friendships API.
     """
 
-    def __init__(self, api_key, api_secret, redirect_uri, token):
+    def __init__(self, api_key, api_secret, redirect_uri, access_token):
         """
         Instantiate a Weibowarc instance. Make sure your  variables
         are set.
@@ -52,7 +201,7 @@ class Weibowarc(object):
         self.api_key = api_key
         self.api_secret = api_secret
         self.redirect_uri = redirect_uri
-        self.access_token = token
+        self.access_token = access_token
         self._connect()
 
     def search_friends_list(self):
@@ -103,7 +252,7 @@ class Weibowarc(object):
                 # time.sleep(2)
 
             resp = self.get(friendships_url, **params)
-            #print resp
+            # print resp
             statuses = resp[u'statuses']
 
             if len(statuses) == 0:
@@ -131,7 +280,7 @@ class Weibowarc(object):
             if error_code in [10022, 10023, 10024]:
                 time.sleep(self._wait_time())
             else:
-                time.sleep(seconds=1)
+                time.sleep(1)
         except requests.exceptions.ConnectionError as e:
             logging.error("caught connection error %s", e)
             self._connect()
@@ -147,7 +296,7 @@ class Weibowarc(object):
             if error_code in [10022, 10023, 10024]:
                 time.sleep(self._wait_time())
             else:
-                time.sleep(seconds=1)
+                time.sleep(1)
         except requests.exceptions.ConnectionError as e:
             logging.error("caught connection error %s", e)
             self._connect()
@@ -201,7 +350,12 @@ class Weibowarc(object):
 
     def _connect(self):
         logging.info("creating client session")
+        #create the token
+        token = {'access_token': self.access_token, 'uid': '', 'expires_at': 1609785214}
         self.client = Client(api_key=self.api_key,
                              api_secret=self.api_secret,
                              redirect_uri=self.redirect_uri,
-                             token=self.access_token)
+                             token=token)
+
+if __name__ == "__main__":
+    main()
