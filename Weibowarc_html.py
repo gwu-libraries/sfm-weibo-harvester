@@ -64,6 +64,24 @@ class WeibowarcHtml(object):
             time.sleep(0.2)
             self._assert_error(res)
 
+    def unfollow_users(self, uids):
+        """
+        Try to destroy follow the special uid in the html ways.
+        --Testing function--
+        :return:
+        """
+        for uid in uids:
+            follow_url = 'http://weibo.cn/attention/del?rl=1&act=delc&uid='+uid+'&st=289582'
+            headers = {
+
+                'Referer': ' http://weibo.cn/attention/del?uid='+uid+'&rl=1&st=289582',
+                'Content-Type': 'application/x-www-form-urlencoded',
+            }
+            res = self.session.get(url=follow_url, headers=headers)
+            # slow down the follow speed
+            time.sleep(0.2)
+            self._assert_error(res)
+
     def get_max_list_num(self, page_text):
         """
         To get the max number of the follower list with these user

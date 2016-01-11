@@ -18,5 +18,21 @@ Currently, a full list of followers can get through the html parser analyzing th
 Since the same reason of limitation of API calling, searing key word also rely on parsing the search result pages, but we can't get the exact time of the post. 
 It can return the user name and text of the weibo post.
 
+##Follow or Unfollow users
+When you try to follow someone using the [friends create API](http://open.weibo.com/wiki/2/friendships/create), it won't work. What we do is parsing the request for adding a friend. 
+The raw data for following user is as follows:
+
+    GET /attention/add?uid=12345678&rl=0&st=d56522 HTTP/1.1
+    Host: weibo.cn
+    Connection: keep-alive
+    Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8
+    Upgrade-Insecure-Requests: 1
+    User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36
+    Referer: http://weibo.cn/u/12345678
+    Accept-Encoding: gzip, deflate, sdch
+    Accept-Language: en-US,en;q=0.8,zh-CN;q=0.6,zh;q=0.4
+    Cookie: XXX-XXXX
+
+Simulating the request data in the http session is a solution for following the special uids, it's very similar for unfollowing users.However, it's not as efficient as calling API.
 
 The html parser is just a possible solution for any exist limitation problem. If possible, the weibo harvester will rely most on the API calling.
