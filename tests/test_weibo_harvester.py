@@ -1,5 +1,5 @@
 import tests
-from tests.weibos import weibo1
+from tests.weibos import weibo1,weibo2
 import unittest
 from mock import MagicMock, patch
 from kombu import Connection, Exchange, Queue, Producer
@@ -13,15 +13,7 @@ from datetime import datetime
 from weibo_harvester import WeiboHarvester
 from weibowarc import Weibowarc
 
-
-class TestWeiboHarvester(tests.TestCase):
-    def setUp(self):
-        self.harvester = WeiboHarvester()
-        self.harvester.state_store = DictHarvestStateStore()
-        self.harvester.harvest_result = HarvestResult()
-        self.harvester.stop_event = threading.Event()
-        self.harvester.harvest_result_lock = threading.Lock()
-        self.harvester.message = {
+base_message = {
             "id": "test:1",
             "type": "weibo_timeline",
             "credentials": {
@@ -36,16 +28,26 @@ class TestWeiboHarvester(tests.TestCase):
             }
         }
 
+
+class TestWeiboHarvester(tests.TestCase):
     @patch("weibo_harvester.Weibowarc", autospec=True)
     def test_search_timeline(self, mock_weibowarc_class):
 
         mock_weibowarc = MagicMock(spec=Weibowarc)
         # Expecting 2 results. First returns 1tweets. Second returns none.
-        mock_weibowarc.search_friendships.side_effect = [(weibo1), ()]
+        mock_weibowarc.search_friendships.side_effect = [(weibo1, weibo2), ()]
         # Return mock_weibowarc when instantiating a weibowarc.
         mock_weibowarc_class.side_effect = [mock_weibowarc]
 
-        self.assertDictEqual({"weibo": 1}, self.harvester.harvest_result.summary)
+        harvester = WeiboHarvester()
+        harvester.state_store = DictHarvestStateStore()
+        harvester.message = base_message
+        harvester.harvest_result = HarvestResult()
+        harvester.stop_event = threading.Event()
+        harvester.harvest_result_lock = threading.Lock()
+        harvester.harvest_seeds()
+
+        self.assertDictEqual({"weibo": 2}, harvester.harvest_result.summary)
         mock_weibowarc_class.assert_called_once_with(tests.WEIBO_API_KEY, tests.WEIBO_API_SECRET,
                                                      tests.WEIBO_REDIRECT_URI, tests.WEIBO_ACCESS_TOKEN)
 

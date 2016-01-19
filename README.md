@@ -21,5 +21,36 @@ pip install -r requirements.txt
 docker-compose -f docker/dev.docker-compose.yml up -d
 ```
 * Running the tests
+```bash
+docker exec sfmdocker_sfmweiboharvester_1 python -m unittest discover
+```
 * Check the logs
+```bash
+docker-compose -f docker/dev.docker-compose.yml logs
+```
 * Shutdown all the containers and clear what you have done
+```bash
+docker-compose -f docker/dev.docker-compose.yml kill
+docker-compose -f docker/dev.docker-compose.yml rm -v --force
+docker rmi $(docker images -q)
+```
+
+# Harvest start messages
+The necessary information to construct a harvest start message for the weibo harvester.
+
+### Search friend timeline harvest type
+**Type**
+
+* weibo_timeline
+
+**API called**
+
+* statuses/friends_timeline
+
+**Optional parameters**
+
+* incremental: True (default) or False
+
+**Summary**
+
+* count for weibos
