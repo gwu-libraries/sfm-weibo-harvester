@@ -15,7 +15,7 @@ from weibowarc import Weibowarc
 
 base_message = {
     "id": "test:1",
-    "type": "tweibo_timeline",
+    "type": "weibo_timeline",
     "credentials": {
         "api_key": test.WEIBO_API_KEY,
         "api_secret": test.WEIBO_API_SECRET,

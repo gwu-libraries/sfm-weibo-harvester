@@ -54,7 +54,7 @@ class WeiboHarvester(BaseHarvester):
             if self.stop_event.is_set():
                 log.debug("Stopping since stop event set.")
                 break
-            if "text" in weibo:
+            if u"text" in weibo:
                 with self.harvest_result_lock:
                     max_weibo_id = max(max_weibo_id, weibo[u"mid"])
                     self.harvest_result.increment_summary("weibo")
