@@ -13,4 +13,5 @@ WORKDIR /opt/sfm-weibo-harvester
 RUN pip install -r requirements.txt
 RUN pip install appdeps
 CMD appdeps.py --port-wait mq:5672 \
-    && python weibo_harvester.py --debug service mq $MQ_ENV_RABBITMQ_DEFAULT_USER $MQ_ENV_RABBITMQ_DEFAULT_PASS
+    && python weibo_harvester.py --debug=$DEBUG service mq $MQ_ENV_RABBITMQ_DEFAULT_USER $MQ_ENV_RABBITMQ_DEFAULT_PASS
+

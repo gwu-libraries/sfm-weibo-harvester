@@ -13,7 +13,7 @@ cd sfm-weibo-harvester
 pip install -r requirements.txt
 ```
 
-#Testing
+# Testing
 * Install [Docker](https://docs.docker.com/installation/) and [Docker-Compose](https://docs.docker.com/compose/install/)
 * Geting the `API_KEY`, `API_SECRET`, `REDIRECT_URI`, `ACCESS_TOKEN`, refer to  [weibowarc](https://github.com/gwu-libraries/weibowarc)
 * Start up the containers
