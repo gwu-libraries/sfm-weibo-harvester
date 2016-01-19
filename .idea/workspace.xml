@@ -3,7 +3,9 @@
   <component name="ChangeListManager">
     <list default="true" id="a39d6192-901c-4d43-9714-bdc6e90a9cdb" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docker/ci.docker-compose.yml" afterPath="$PROJECT_DIR$/docker/ci.docker-compose.yml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/README.md" afterPath="$PROJECT_DIR$/README.md" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tests/test_weibo_harvester.py" afterPath="$PROJECT_DIR$/tests/test_weibo_harvester.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/weibo_harvester.py" afterPath="$PROJECT_DIR$/weibo_harvester.py" />
     </list>
     <ignored path="sfm-weibo-harvester.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -36,9 +38,11 @@
       <file leaf-file-name="weibo_harvester.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/weibo_harvester.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-0.9">
-              <caret line="3" column="38" selection-start-line="3" selection-start-column="38" selection-end-line="3" selection-end-column="38" />
-              <folding />
+            <state vertical-scroll-proportion="-7.5">
+              <caret line="34" column="38" selection-start-line="34" selection-start-column="38" selection-end-line="34" selection-end-column="38" />
+              <folding>
+                <element signature="e#47#85#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -53,10 +57,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="ci.docker-compose.yml" pinned="false" current-in-tab="true">
+      <file leaf-file-name="ci.docker-compose.yml" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/docker/ci.docker-compose.yml">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.22689076">
+            <state vertical-scroll-proportion="0.0">
               <caret line="12" column="0" selection-start-line="12" selection-start-column="0" selection-end-line="12" selection-end-column="0" />
               <folding />
             </state>
@@ -79,8 +83,8 @@
         <entry file="file://$PROJECT_DIR$/README.md">
           <provider editor-type-id="split-provider[text-editor;MultiMarkdownPreviewEditor]">
             <state split_layout="FIRST">
-              <first_editor vertical-scroll-proportion="0.61787707">
-                <caret line="43" column="16" selection-start-line="43" selection-start-column="16" selection-end-line="43" selection-end-column="16" />
+              <first_editor vertical-scroll-proportion="0.10055866">
+                <caret line="5" column="130" selection-start-line="5" selection-start-column="130" selection-end-line="5" selection-end-column="130" />
                 <folding />
               </first_editor>
               <second_editor />
@@ -101,11 +105,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="test_weibo_harvester.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="test_weibo_harvester.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/tests/test_weibo_harvester.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-32.275864">
-              <caret line="70" column="56" selection-start-line="70" selection-start-column="56" selection-end-line="70" selection-end-column="56" />
+            <state vertical-scroll-proportion="0.48754063">
+              <caret line="55" column="43" selection-start-line="55" selection-start-column="43" selection-end-line="55" selection-end-column="43" />
               <folding>
                 <element signature="e#0#12#0" expanded="true" />
               </folding>
@@ -116,8 +120,8 @@
       <file leaf-file-name="weibos.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/tests/weibos.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-21.275862">
-              <caret line="79" column="0" selection-start-line="79" selection-start-column="0" selection-end-line="79" selection-end-column="0" />
+            <state vertical-scroll-proportion="-10.103448">
+              <caret line="124" column="21" selection-start-line="124" selection-start-column="21" selection-end-line="124" selection-end-column="21" />
               <folding />
             </state>
           </provider>
@@ -175,12 +179,12 @@
         <option value="$PROJECT_DIR$/docker/dev.docker-compose.yml" />
         <option value="$PROJECT_DIR$/docker/dev/Dockerfile" />
         <option value="$PROJECT_DIR$/test/weiboharvester_test.py" />
-        <option value="$PROJECT_DIR$/README.md" />
-        <option value="$PROJECT_DIR$/tests/weibos.py" />
-        <option value="$PROJECT_DIR$/weibo_harvester.py" />
-        <option value="$PROJECT_DIR$/tests/test_weibo_harvester.py" />
         <option value="$PROJECT_DIR$/.travis.yml" />
         <option value="$PROJECT_DIR$/docker/ci.docker-compose.yml" />
+        <option value="$PROJECT_DIR$/README.md" />
+        <option value="$PROJECT_DIR$/tests/weibos.py" />
+        <option value="$PROJECT_DIR$/tests/test_weibo_harvester.py" />
+        <option value="$PROJECT_DIR$/weibo_harvester.py" />
       </list>
     </option>
   </component>
@@ -1103,11 +1107,45 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/.travis.yml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="13" column="24" selection-start-line="13" selection-start-column="24" selection-end-line="13" selection-end-column="24" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/docker/ci.docker-compose.yml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="12" column="0" selection-start-line="12" selection-start-column="0" selection-end-line="12" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/tests/weibos.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-10.103448">
+          <caret line="124" column="21" selection-start-line="124" selection-start-column="21" selection-end-line="124" selection-end-column="21" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/weibo_harvester.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-7.5">
+          <caret line="34" column="38" selection-start-line="34" selection-start-column="38" selection-end-line="34" selection-end-column="38" />
+          <folding>
+            <element signature="e#47#85#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/README.md">
       <provider editor-type-id="split-provider[text-editor;MultiMarkdownPreviewEditor]">
         <state split_layout="FIRST">
-          <first_editor vertical-scroll-proportion="0.61787707">
-            <caret line="43" column="16" selection-start-line="43" selection-start-column="16" selection-end-line="43" selection-end-column="16" />
+          <first_editor vertical-scroll-proportion="0.10055866">
+            <caret line="5" column="130" selection-start-line="5" selection-start-column="130" selection-end-line="5" selection-end-column="130" />
             <folding />
           </first_editor>
           <second_editor />
@@ -1124,43 +1162,11 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/tests/test_weibo_harvester.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-32.275864">
-          <caret line="70" column="56" selection-start-line="70" selection-start-column="56" selection-end-line="70" selection-end-column="56" />
+        <state vertical-scroll-proportion="0.48754063">
+          <caret line="55" column="43" selection-start-line="55" selection-start-column="43" selection-end-line="55" selection-end-column="43" />
           <folding>
             <element signature="e#0#12#0" expanded="true" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/tests/weibos.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-21.275862">
-          <caret line="79" column="0" selection-start-line="79" selection-start-column="0" selection-end-line="79" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/weibo_harvester.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-0.9">
-          <caret line="3" column="38" selection-start-line="3" selection-start-column="38" selection-end-line="3" selection-end-column="38" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/.travis.yml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="13" column="24" selection-start-line="13" selection-start-column="24" selection-end-line="13" selection-end-column="24" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/docker/ci.docker-compose.yml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.22689076">
-          <caret line="12" column="0" selection-start-line="12" selection-start-column="0" selection-end-line="12" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>

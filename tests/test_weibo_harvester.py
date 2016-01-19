@@ -1,7 +1,7 @@
 import tests
 from tests.weibos import weibo1,weibo2
 import unittest
-from mock import MagicMock, patch
+from mock import MagicMock, patch,call
 from kombu import Connection, Exchange, Queue, Producer
 from sfmutils.state_store import DictHarvestStateStore
 from sfmutils.harvester import HarvestResult, EXCHANGE
@@ -13,7 +13,15 @@ from datetime import datetime
 from weibo_harvester import WeiboHarvester
 from weibowarc import Weibowarc
 
-base_message = {
+
+class TestWeiboHarvester(tests.TestCase):
+    def setUp(self):
+        self.harvester = WeiboHarvester()
+        self.harvester.state_store = DictHarvestStateStore()
+        self.harvester.harvest_result = HarvestResult()
+        self.harvester.stop_event = threading.Event()
+        self.harvester.harvest_result_lock = threading.Lock()
+        self.harvester.message = {
             "id": "test:1",
             "type": "weibo_timeline",
             "credentials": {
@@ -28,8 +36,6 @@ base_message = {
             }
         }
 
-
-class TestWeiboHarvester(tests.TestCase):
     @patch("weibo_harvester.Weibowarc", autospec=True)
     def test_search_timeline(self, mock_weibowarc_class):
 
@@ -39,17 +45,35 @@ class TestWeiboHarvester(tests.TestCase):
         # Return mock_weibowarc when instantiating a weibowarc.
         mock_weibowarc_class.side_effect = [mock_weibowarc]
 
-        harvester = WeiboHarvester()
-        harvester.state_store = DictHarvestStateStore()
-        harvester.message = base_message
-        harvester.harvest_result = HarvestResult()
-        harvester.stop_event = threading.Event()
-        harvester.harvest_result_lock = threading.Lock()
-        harvester.harvest_seeds()
-
-        self.assertDictEqual({"weibo": 2}, harvester.harvest_result.summary)
+        self.harvester.harvest_seeds()
+        self.assertDictEqual({"weibo": 2}, self.harvester.harvest_result.summary)
         mock_weibowarc_class.assert_called_once_with(tests.WEIBO_API_KEY, tests.WEIBO_API_SECRET,
                                                      tests.WEIBO_REDIRECT_URI, tests.WEIBO_ACCESS_TOKEN)
+
+    @patch("weibo_harvester.Weibowarc", autospec=True)
+    def test_incremental_search(self, mock_weibowarc_class):
+
+        mock_weibowarc = MagicMock(spec=Weibowarc)
+        # Expecting 2 searches. First returns 2 weibos,one is none. Second returns none.
+        mock_weibowarc.search_friendships.side_effect = [(weibo1,), ()]
+        # Return mock_weibowarc when instantiating a weibowarc.
+        mock_weibowarc_class.side_effect = [mock_weibowarc]
+
+        self.harvester.message["options"] = {
+            # Incremental means that will only retrieve new results.
+            "incremental": True
+        }
+
+        self.harvester.state_store.set_state("weibo_harvester", "weibo.since_id", 3928410122302972)
+        self.harvester.harvest_seeds()
+
+        self.assertDictEqual({"weibo": 1}, self.harvester.harvest_result.summary)
+        mock_weibowarc_class.assert_called_once_with(tests.WEIBO_API_KEY, tests.WEIBO_API_SECRET,
+                                                     tests.WEIBO_REDIRECT_URI, tests.WEIBO_ACCESS_TOKEN)
+        self.assertEqual([call(since_id=3928410122302972), call(since_id=None)],
+                         mock_weibowarc.search_friendships.mock_calls)
+        # State updated
+        self.assertEqual(3928085689165996, self.harvester.state_store.get_state("weibo_harvester", "weibo.since_id"))
 
 
 @unittest.skipIf(not tests.test_config_available, "Skipping test since test config not available.")
