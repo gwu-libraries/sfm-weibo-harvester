@@ -1,7 +1,7 @@
-import test
-from test.weibos import weibo1
+import tests
+from tests.weibos import weibo1
 import unittest
-from mock import MagicMock
+from mock import MagicMock, patch
 from kombu import Connection, Exchange, Queue, Producer
 from sfmutils.state_store import DictHarvestStateStore
 from sfmutils.harvester import HarvestResult, EXCHANGE
@@ -13,23 +13,30 @@ from datetime import datetime
 from weibo_harvester import WeiboHarvester
 from weibowarc import Weibowarc
 
-base_message = {
-    "id": "test:1",
-    "type": "weibo_timeline",
-    "credentials": {
-        "api_key": test.WEIBO_API_KEY,
-        "api_secret": test.WEIBO_API_SECRET,
-        "redirect_uri": test.WEIBO_REDIRECT_URI,
-        "access_token": test.WEIBO_ACCESS_TOKEN
-    },
-    "collection": {
-        "id": "test_collection",
-        "path": "/collections/test_collection"
-    }
-}
 
+class TestWeiboHarvester(tests.TestCase):
+    def setUp(self):
+        self.harvester = WeiboHarvester()
+        self.harvester.state_store = DictHarvestStateStore()
+        self.harvester.harvest_result = HarvestResult()
+        self.harvester.stop_event = threading.Event()
+        self.harvester.harvest_result_lock = threading.Lock()
+        self.harvester.message = {
+            "id": "test:1",
+            "type": "weibo_timeline",
+            "credentials": {
+                "api_key": tests.WEIBO_API_KEY,
+                "api_secret": tests.WEIBO_API_SECRET,
+                "redirect_uri": tests.WEIBO_REDIRECT_URI,
+                "access_token": tests.WEIBO_ACCESS_TOKEN
+            },
+            "collection": {
+                "id": "test_collection",
+                "path": "/collections/test_collection"
+            }
+        }
 
-class TestWeiboHarvester(test.TestCase):
+    @patch("weibo_harvester.Weibowarc", autospec=True)
     def test_search_timeline(self, mock_weibowarc_class):
 
         mock_weibowarc = MagicMock(spec=Weibowarc)
@@ -38,24 +45,16 @@ class TestWeiboHarvester(test.TestCase):
         # Return mock_weibowarc when instantiating a weibowarc.
         mock_weibowarc_class.side_effect = [mock_weibowarc]
 
-        harvester = WeiboHarvester()
-        harvester.state_store = DictHarvestStateStore()
-        harvester.message = base_message
-        harvester.harvest_result = HarvestResult()
-        harvester.stop_event = threading.Event()
-        harvester.harvest_result_lock = threading.Lock()
-        harvester.harvest_seeds()
-
-        self.assertDictEqual({"weibo": 1}, harvester.harvest_result.summary)
-        mock_weibowarc_class.assert_called_once_with(test.WEIBO_API_KEY, test.WEIBO_API_SECRET,
-                                                     test.WEIBO_REDIRECT_URI, test.WEIBO_ACCESS_TOKEN)
+        self.assertDictEqual({"weibo": 1}, self.harvester.harvest_result.summary)
+        mock_weibowarc_class.assert_called_once_with(tests.WEIBO_API_KEY, tests.WEIBO_API_SECRET,
+                                                     tests.WEIBO_REDIRECT_URI, tests.WEIBO_ACCESS_TOKEN)
 
 
-@unittest.skipIf(not test.test_config_available, "Skipping test since test config not available.")
-@unittest.skipIf(not test.integration_env_available, "Skipping test since integration env not available.")
-class TestWeiboHarvesterIntegration(test.TestCase):
+@unittest.skipIf(not tests.test_config_available, "Skipping test since test config not available.")
+@unittest.skipIf(not tests.integration_env_available, "Skipping test since integration env not available.")
+class TestWeiboHarvesterIntegration(tests.TestCase):
     def _create_connection(self):
-        return Connection(hostname="mq", userid=test.mq_username, password=test.mq_password)
+        return Connection(hostname="mq", userid=tests.mq_username, password=tests.mq_password)
 
     def setUp(self):
         self.exchange = Exchange(EXCHANGE, type="topic")
@@ -83,10 +82,10 @@ class TestWeiboHarvesterIntegration(test.TestCase):
             "id": "test:1",
             "type": "weibo_timeline",
             "credentials": {
-                "api_key": test.WEIBO_API_KEY,
-                "api_secret": test.WEIBO_API_SECRET,
-                "redirect_uri": test.WEIBO_REDIRECT_URI,
-                "access_token": test.WEIBO_ACCESS_TOKEN
+                "api_key": tests.WEIBO_API_KEY,
+                "api_secret": tests.WEIBO_API_SECRET,
+                "redirect_uri": tests.WEIBO_REDIRECT_URI,
+                "access_token": tests.WEIBO_ACCESS_TOKEN
             },
             "collection": {
                 "id": "test_collection",
@@ -97,7 +96,7 @@ class TestWeiboHarvesterIntegration(test.TestCase):
         with self._create_connection() as connection:
             bound_exchange = self.exchange(connection)
             producer = Producer(connection, exchange=bound_exchange)
-            producer.publish(harvest_msg, routing_key="harvest.start.weibo.timeline_search")
+            producer.publish(harvest_msg, routing_key="harvest.start.weibo.weibo_timeline")
 
             # Now wait for result message.
             counter = 0
@@ -113,14 +112,14 @@ class TestWeiboHarvesterIntegration(test.TestCase):
             self.assertEqual("test:1", result_msg["id"])
             # Success
             self.assertEqual("completed success", result_msg["status"])
-            # Some tweets
+            # Some weibo posts
             self.assertTrue(result_msg["summary"]["weibo"])
 
             # Web harvest message.
             bound_web_harvest_queue = self.web_harvest_queue(connection)
             message_obj = bound_web_harvest_queue.get(no_ack=True)
             self.assertIsNotNone(message_obj, "No web harvest message.")
-            web_harvest_msg = message_obj.payload
+
             # Warc created message.
             bound_warc_created_queue = self.warc_created_queue(connection)
             message_obj = bound_warc_created_queue.get(no_ack=True)

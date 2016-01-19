@@ -9,7 +9,7 @@ from weibowarc import Weibowarc
 log = logging.getLogger(__name__)
 
 QUEUE = "weibo_harvester"
-ROUTING_KEY = "harvest.start.weibo.timeline_search"
+ROUTING_KEY = "harvest.start.weibo.weibo_timeline"
 
 
 class WeiboHarvester(BaseHarvester):
@@ -32,7 +32,7 @@ class WeiboHarvester(BaseHarvester):
 
         # Get since_id from state_store
         since_id = self.state_store.get_state(__name__, "{}.since_id".format('weibo')) if incremental else None
-        max_weibo_id = self._process_tweets(self.weibowarc.search_friendships(since_id=since_id))
+        max_weibo_id = self._process_weibos(self.weibowarc.search_friendships(since_id=since_id))
         log.debug("Searching since %s returned %s weibo.",
                     since_id, self.harvest_result.summary.get("weibo"))
 
@@ -46,7 +46,7 @@ class WeiboHarvester(BaseHarvester):
                                    self.message["credentials"]["redirect_uri"],
                                    self.message["credentials"]["access_token"])
 
-    def _process_tweets(self, weibos):
+    def _process_weibos(self, weibos):
         max_weibo_id = None
         for count, weibo in enumerate(weibos):
             if not count % 150:
