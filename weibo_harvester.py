@@ -32,7 +32,6 @@ class WeiboHarvester(BaseHarvester):
 
         # Get since_id from state_store
         since_id = self.state_store.get_state(__name__, "{}.since_id".format('weibo')) if incremental else None
-        log.debug("Searching since %s weibo.",since_id)
         max_weibo_id = self._process_weibos(self.weibowarc.search_friendships(since_id=since_id))
         log.debug("Searching since %s returned %s weibo.",
                     since_id, self.harvest_result.summary.get("weibo"))

@@ -50,12 +50,16 @@ class TestWeiboHarvester(tests.TestCase):
         mock_weibowarc_class.assert_called_once_with(tests.WEIBO_API_KEY, tests.WEIBO_API_SECRET,
                                                      tests.WEIBO_REDIRECT_URI, tests.WEIBO_ACCESS_TOKEN)
 
+        self.assertEqual([call(since_id=None)], mock_weibowarc.search_friendships.mock_calls)
+        # Nothing added to state
+        self.assertEqual(0, len(self.harvester.state_store._state))
+
     @patch("weibo_harvester.Weibowarc", autospec=True)
     def test_incremental_search(self, mock_weibowarc_class):
 
         mock_weibowarc = MagicMock(spec=Weibowarc)
         # Expecting 2 searches. First returns 2 weibos,one is none. Second returns none.
-        mock_weibowarc.search_friendships.side_effect = [(weibo1,), ()]
+        mock_weibowarc.search_friendships.side_effect = [(weibo2,), ()]
         # Return mock_weibowarc when instantiating a weibowarc.
         mock_weibowarc_class.side_effect = [mock_weibowarc]
 
@@ -64,16 +68,18 @@ class TestWeiboHarvester(tests.TestCase):
             "incremental": True
         }
 
-        self.harvester.state_store.set_state("weibo_harvester", "weibo.since_id", 3928410122302972)
+        self.harvester.state_store.set_state("weibo_harvester", "weibo.since_id", 3927348724716740)
         self.harvester.harvest_seeds()
 
         self.assertDictEqual({"weibo": 1}, self.harvester.harvest_result.summary)
         mock_weibowarc_class.assert_called_once_with(tests.WEIBO_API_KEY, tests.WEIBO_API_SECRET,
                                                      tests.WEIBO_REDIRECT_URI, tests.WEIBO_ACCESS_TOKEN)
-        self.assertEqual([call(since_id=3928410122302972), call(since_id=None)],
-                         mock_weibowarc.search_friendships.mock_calls)
+
+        # since_id must be in the mock calls
+        self.assertEqual([call(since_id=3927348724716740)], mock_weibowarc.search_friendships.mock_calls)
+        self.assertNotEqual([call(since_id=None)], mock_weibowarc.search_friendships.mock_calls)
         # State updated
-        self.assertEqual(3928085689165996, self.harvester.state_store.get_state("weibo_harvester", "weibo.since_id"))
+        self.assertEqual(3928235789939265, self.harvester.state_store.get_state("weibo_harvester", "weibo.since_id"))
 
 
 @unittest.skipIf(not tests.test_config_available, "Skipping test since test config not available.")
