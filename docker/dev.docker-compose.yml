@@ -7,7 +7,7 @@ sfmrabbit:
         - RABBITMQ_DEFAULT_USER=sfm_user
         - RABBITMQ_DEFAULT_PASS=password
 sfmweiboharvester:
-    image: victtan/sfm-weibo-harvester:dev
+    image: gwul/sfm-weibo-harvester:dev
     links:
         - sfmrabbit:mq
     volumes:
