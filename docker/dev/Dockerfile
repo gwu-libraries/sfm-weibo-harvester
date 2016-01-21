@@ -7,7 +7,7 @@ RUN apt-get update && apt-get install -y \
 #Upgrade pip
 RUN pip install --upgrade pip
 #Install the requirement
-ADD https://raw.githubusercontent.com/gwu-libraries/sfm-weibo-harvester/master/requirements.txt /tmp/
+ADD https://raw.githubusercontent.com/gwu-libraries/sfm-weibo-harvester/dev/requirements.txt /tmp/
 RUN pip install -r /tmp/requirements.txt
 RUN pip install appdeps
 #It should mounted as your development dir
