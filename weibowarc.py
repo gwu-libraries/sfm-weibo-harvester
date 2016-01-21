@@ -266,6 +266,20 @@ class Weibowarc(object):
 
             max_id = str(int(status[u'mid']) - 1)
 
+    def get_long_urls(self,urls_short):
+        logging.info("starting get long urls for short url:%s.", urls_short)
+        longurls_url = "short_url/expand"
+        params = {
+            'url_short': urls_short
+        }
+
+        resp = self.get(longurls_url, **params)
+        # print resp
+        urls = resp[u'urls']
+
+        for url in urls:
+            yield url
+
     @catch_conn_reset
     def get(self, *args, **kwargs):
         try:
