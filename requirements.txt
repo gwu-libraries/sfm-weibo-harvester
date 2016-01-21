@@ -3,4 +3,5 @@ weibo==0.2.2
 request
 git+https://github.com/gwu-libraries/sfm-utils.git@master#egg=sfmutils
 librabbitmq==1.6.1
-git+https://github.com/gwu-libraries/weibowarc.git@0.1.0#egg=weibowarc
+vcrpy
+beautifulsoup4

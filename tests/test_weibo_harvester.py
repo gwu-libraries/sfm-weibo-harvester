@@ -1,4 +1,5 @@
 import tests
+import vcr as base_vcr
 from tests.weibos import weibo1,weibo2
 import unittest
 from mock import MagicMock, patch,call
@@ -12,6 +13,47 @@ import time
 from datetime import datetime
 from weibo_harvester import WeiboHarvester
 from weibowarc import Weibowarc
+
+
+vcr = base_vcr.VCR(
+        cassette_library_dir='tests/fixtures',
+        record_mode='once',
+    )
+
+
+class TestWeiboHarvesterVCR(tests.TestCase):
+    def setUp(self):
+        self.harvester = WeiboHarvester()
+        self.harvester.state_store = DictHarvestStateStore()
+        self.harvester.harvest_result = HarvestResult()
+        self.harvester.stop_event = threading.Event()
+        self.harvester.harvest_result_lock = threading.Lock()
+        self.harvester.message = {
+            "id": "test:1",
+            "type": "weibo_timeline",
+            "credentials": {
+                "api_key": tests.WEIBO_API_KEY,
+                "api_secret": tests.WEIBO_API_SECRET,
+                "redirect_uri": tests.WEIBO_REDIRECT_URI,
+                "access_token": tests.WEIBO_ACCESS_TOKEN
+            },
+            "collection": {
+                "id": "test_collection",
+                "path": "/collections/test_collection"
+            }
+        }
+
+    @vcr.use_cassette()
+    @patch("weibo_harvester.Weibowarc", autospec=True)
+    def test_search(self, mock_weibowarc_class):
+        self.harvester.harvest_seeds()
+        #self.assertDictEqual({"weibo": 150}, self.harvester.harvest_result.summary)
+        mock_weibowarc_class.assert_called_once_with(tests.WEIBO_API_KEY, tests.WEIBO_API_SECRET,
+                                                     tests.WEIBO_REDIRECT_URI, tests.WEIBO_ACCESS_TOKEN)
+
+        # self.assertEqual([call(since_id=None)], mock_weibowarc_class.search_friendships.mock_calls)
+        # Nothing added to state
+        #self.assertEqual(0, len(self.harvester.state_store._state))
 
 
 class TestWeiboHarvester(tests.TestCase):
