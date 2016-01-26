@@ -42,10 +42,10 @@ pip install -r requirements.txt
 ```  
 
 # Following the users manually  
-1. Login sina weibo account
-2. Search the users you want to follow
+*  Login sina weibo account at [here](http://weibo.com)
+*  Search the users you want to follow
 ![Image of search](images/follow-step-1.jpg?raw=true)
-3. Click the follow button
+*  Click the follow button
 ![Image of follow](images/follow-step-2.jpg?raw=true)
 
 # Testing
@@ -56,9 +56,9 @@ python -m unittest discover
 ```
 
 ## Integration tests in docker containers
-1. Install [Docker](https://docs.docker.com/installation/) and [Docker-Compose](https://docs.docker.com/compose/install/)
+* Install [Docker](https://docs.docker.com/installation/) and [Docker-Compose](https://docs.docker.com/compose/install/)
 
-2. Provide  the `API_KEY`, `API_SECRET`, `REDIRECT_URI`, `ACCESS_TOKEN` to the tests. This can be done either by putting them in a file named test_config.py or in environment variables (`API_KEY`, `API_SECRET`, `REDIRECT_URI`, `ACCESS_TOKEN`). An example test_config.py looks like:
+* Provide  the `API_KEY`, `API_SECRET`, `REDIRECT_URI`, `ACCESS_TOKEN` to the tests. This can be done either by putting them in a file named test_config.py or in environment variables (`API_KEY`, `API_SECRET`, `REDIRECT_URI`, `ACCESS_TOKEN`). An example test_config.py looks like:
 ```bash
 API_KEY = "123456789"
 API_SECRET = "34567890123312"
@@ -66,22 +66,22 @@ REDIRECT_URI = "https://www.google.com"
 ACCESS_TOKEN = "2.kQCxKsdpYiFYDc41039481c0fi"
 ```
 
-3. Start up the containers
+* Start up the containers
 ```bash
 docker-compose -f docker/dev.docker-compose.yml up -d
 ```
 
-4. Running the tests
+* Running the tests
 ```bash
 docker exec sfmdocker_sfmweiboharvester_1 python -m unittest discover
 ```
 
-5. Check the logs
+* Check the logs
 ```bash
 docker-compose -f docker/dev.docker-compose.yml logs
 ```
 
-6. Shutdown all the containers and clear what you have done
+* Shutdown all the containers and clear what you have done
 ```bash
 docker-compose -f docker/dev.docker-compose.yml kill
 docker-compose -f docker/dev.docker-compose.yml rm -v --force
