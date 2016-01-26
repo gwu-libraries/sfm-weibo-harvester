@@ -18,7 +18,7 @@ pip install -r requirements.txt
 
 # Testing
 * Install [Docker](https://docs.docker.com/installation/) and [Docker-Compose](https://docs.docker.com/compose/install/)
-* Geting the `API_KEY`, `API_SECRET`, `REDIRECT_URI`, `ACCESS_TOKEN`, refer to  [weibowarc](https://github.com/gwu-libraries/weibowarc)
+* Getting the `API_KEY`, `API_SECRET`, `REDIRECT_URI`, `ACCESS_TOKEN` and finishing the pre-works at [weibowarc](#weibowarc)
 * Start up the containers
 ```bash
 docker-compose -f docker/dev.docker-compose.yml up -d
@@ -102,6 +102,9 @@ git+https://github.com/gwu-libraries/weibowarc.git@master#egg=weibowarc
     >>> c.token
     {u'access_token': u'abcd',u'remind_in': u'123456', u'uid': u'123456', u'expires_at': 1609785214}
 ```  
+
+###Follower the collecting users manually  
+This step is really subject to the limitation of API calling. 
 
 ###Harvesting through [friends_timeline](http://open.weibo.com/wiki/2/statuses/friends_timeline)
 Using the `API_KEY`, `API_SECRET`, `REDIRECT_URI`, `ACCESS_TOKEN` above to get the posts.

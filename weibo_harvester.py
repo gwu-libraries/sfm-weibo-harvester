@@ -9,7 +9,7 @@ from weibowarc import Weibowarc
 log = logging.getLogger(__name__)
 
 QUEUE = "weibo_harvester"
-ROUTING_KEY = "harvest.start.weibo.weibo_timeline"
+ROUTING_KEY = "harvest.start.weibo.*"
 
 
 class WeiboHarvester(BaseHarvester):

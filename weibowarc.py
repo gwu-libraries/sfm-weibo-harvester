@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import
 import os
 import sys
 import logging
@@ -10,6 +11,8 @@ import requests
 from weibo import Client
 import argparse
 from datetime import datetime, timedelta
+
+log = logging.getLogger(__name__)
 
 try:
     import configparser  # Python 3
@@ -107,9 +110,9 @@ def main():
             print(json.dumps(weibo))
         # adding log infor
         if u'mid' in weibo:
-            logging.info("archived weibo [%s]:[%s]", weibo[u'user'][u'screen_name'], weibo[u"mid"])
+            log.info("archived weibo [%s]:[%s]", weibo[u'user'][u'screen_name'], weibo[u"mid"])
         else:
-            logging.warn(json.dumps(weibo))
+            log.warn(json.dumps(weibo))
 
 
 def save_config(filename, profile,
@@ -206,7 +209,7 @@ class Weibowarc(object):
         30% of users haven't give right to the application
         :return:
         """
-        logging.info("starting search for friend.")
+        log.info("starting search for friend.")
         friends_url = "friendships/friends"
 
         params = {'count': 100}
@@ -217,7 +220,7 @@ class Weibowarc(object):
         statuses = resp[u'users']
 
         if len(statuses) == 0:
-            logging.info("no new weibo friendlist matching %s", params)
+            log.info("no new weibo friendlist matching %s", params)
             return
 
         for status in statuses:
@@ -230,7 +233,7 @@ class Weibowarc(object):
         :param since_id:
         :param max_id:
         """
-        logging.info("starting search for max_id:%s, since_id:%s.", max_id, since_id)
+        log.info("starting search for max_id:%s, since_id:%s.", max_id, since_id)
         friendships_url = "statuses/friends_timeline"
         params = {
             'count': 100,
@@ -252,7 +255,7 @@ class Weibowarc(object):
             statuses = resp[u'statuses']
 
             if len(statuses) == 0:
-                logging.info("no new weibo post matching %s", params)
+                log.info("no new weibo post matching %s", params)
                 break
 
             for status in statuses:
@@ -267,7 +270,7 @@ class Weibowarc(object):
             max_id = str(int(status[u'mid']) - 1)
 
     def get_long_urls(self,urls_short):
-        logging.info("starting get long urls for short url:%s.", urls_short)
+        log.info("starting get long urls for short url:%s.", urls_short)
         longurls_url = "short_url/expand"
         params = {
             'url_short': urls_short
@@ -285,14 +288,14 @@ class Weibowarc(object):
         try:
             return self.client.get(*args, **kwargs)
         except RuntimeError, e:
-            logging.error("caught runtime error %s", e)
+            log.error("caught runtime error %s", e)
             error_code = ''.join(e)[0:5]
             if error_code in ['10022', '10023', '10024']:
                 time.sleep(self.wait_time())
             else:
                 raise e
         except requests.exceptions.ConnectionError as e:
-            logging.error("caught connection error %s", e)
+            log.error("caught connection error %s", e)
             self._connect()
             return self.get(*args, **kwargs)
 
@@ -301,14 +304,14 @@ class Weibowarc(object):
         try:
             return self.client.post(*args, **kwargs)
         except RuntimeError, e:
-            logging.error("caught runtime error %s", e)
+            log.error("caught runtime error %s", e)
             error_code = ''.join(e)[0:5]
             if error_code in ['10022', '10023', '10024']:
                 time.sleep(self.wait_time())
             else:
                 raise e
         except requests.exceptions.ConnectionError as e:
-            logging.error("caught connection error %s", e)
+            log.error("caught connection error %s", e)
             self._connect()
             return self.post(*args, **kwargs)
 
@@ -352,15 +355,18 @@ class Weibowarc(object):
         return reset_ts - time.time() + 10
 
     def _connect(self):
-        logging.info("creating client session")
+        log.info("creating client session with api_key=%s", self.api_key)
         # create the token
         # The uid and expires_at actually not used in the following
         token = {'access_token': self.access_token, 'uid': '', 'expires_at': 1609785214}
-        self.client = Client(api_key=self.api_key,
-                             api_secret=self.api_secret,
-                             redirect_uri=self.redirect_uri,
-                             token=token)
-
+        try:
+            self.client = Client(api_key=self.api_key,
+                                api_secret=self.api_secret,
+                                redirect_uri=self.redirect_uri,
+                                token=token)
+        except Exception, e:
+            log.error("creating client session error,%s", e)
+            raise e
 
 if __name__ == "__main__":
     main()
