@@ -50,7 +50,8 @@ pip install -r requirements.txt
 
 # Testing
 ## Unit testing
-```python
+Running the unittest command in bash.
+```bash
 python -m unittest discover
 ```
 
@@ -58,7 +59,7 @@ python -m unittest discover
 1. Install [Docker](https://docs.docker.com/installation/) and [Docker-Compose](https://docs.docker.com/compose/install/)
 
 2. Provide  the `API_KEY`, `API_SECRET`, `REDIRECT_URI`, `ACCESS_TOKEN` to the tests. This can be done either by putting them in a file named test_config.py or in environment variables (`API_KEY`, `API_SECRET`, `REDIRECT_URI`, `ACCESS_TOKEN`). An example test_config.py looks like:
-```python
+```bash
 API_KEY = "123456789"
 API_SECRET = "34567890123312"
 REDIRECT_URI = "https://www.google.com"
