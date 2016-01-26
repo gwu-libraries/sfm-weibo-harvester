@@ -5,7 +5,7 @@ A basic harvester for Sina Weibo public post data as part of Social Feed Manager
 
 Provides harvesters for [Sina Weibo API](http://open.weibo.com/wiki/%E5%BE%AE%E5%8D%9AAPI) and [Html Parser](http://www.crummy.com/software/BeautifulSoup/bs4/doc/)
 
-Harvesting is performed by [weibowarc](#weibowarc).
+Harvesting is performed by weibowarc.
 
 The [weibowarchtml](#weibowarchtml) is just a possible solution for any exist limitation problem. If possible, the weibo harvester will rely mostly on the API calling.
 
@@ -16,22 +16,71 @@ cd sfm-weibo-harvester
 pip install -r requirements.txt
 ```
 
+# Ready to work
+* Sign up for a Sina developer account at [Sina Development Platform](http://open.weibo.com/apps) to create a new app.
+* Get the information about `API_KEY`, `API_SECRET`, `REDIRECT_URI`.
+* How to get these information you can refer to the [API guide](https://www.cs.cmu.edu/~lingwang/weiboguide/).
+
+# Get a token authentication
+* Get the authorize url
+```python
+    >>> from weibo import Client
+    >>> c = Client(API_KEY, API_SECRET, REDIRECT_URI)
+    >>> c.authorize_url
+    'https://api.weibo.com/oauth2/authorize?redirect_uri=http%3A%2F%2F&client_id=123456'
+```    
+* Open the authorize url in your local browser
+* Login with your weibo account or click the '授权'(Authorized) button to get the code in the return URL marked as 'code='
+* Set authorize code
+```python
+    >>> c.set_code('codecodecode')
+```
+* Get the `ACCESS_TOKEN`.
+```python
+    >>> c.token
+    {u'access_token': u'abcd',u'remind_in': u'123456', u'uid': u'123456', u'expires_at': 1609785214}
+```  
+
+# Following the users manually  
+1. Login sina weibo account
+2. Search the users you want to follow
+![Image of search](images/follow-step-1.jpg?raw=true)
+3. Click the follow button
+![Image of follow](images/follow-step-2.jpg?raw=true)
+
 # Testing
-* Install [Docker](https://docs.docker.com/installation/) and [Docker-Compose](https://docs.docker.com/compose/install/)
-* Getting the `API_KEY`, `API_SECRET`, `REDIRECT_URI`, `ACCESS_TOKEN` and finishing the pre-works at [weibowarc](#weibowarc)
-* Start up the containers
+## Unit testing
+```python
+python -m unittest discover
+```
+
+## Integration tests in docker containers
+1. Install [Docker](https://docs.docker.com/installation/) and [Docker-Compose](https://docs.docker.com/compose/install/)
+
+2. Provide  the `API_KEY`, `API_SECRET`, `REDIRECT_URI`, `ACCESS_TOKEN` to the tests. This can be done either by putting them in a file named test_config.py or in environment variables (`API_KEY`, `API_SECRET`, `REDIRECT_URI`, `ACCESS_TOKEN`). An example test_config.py looks like:
+```python
+API_KEY = "123456789"
+API_SECRET = "34567890123312"
+REDIRECT_URI = "https://www.google.com"
+ACCESS_TOKEN = "2.kQCxKsdpYiFYDc41039481c0fi"
+```
+
+3. Start up the containers
 ```bash
 docker-compose -f docker/dev.docker-compose.yml up -d
 ```
-* Running the tests
+
+4. Running the tests
 ```bash
 docker exec sfmdocker_sfmweiboharvester_1 python -m unittest discover
 ```
-* Check the logs
+
+5. Check the logs
 ```bash
 docker-compose -f docker/dev.docker-compose.yml logs
 ```
-* Shutdown all the containers and clear what you have done
+
+6. Shutdown all the containers and clear what you have done
 ```bash
 docker-compose -f docker/dev.docker-compose.yml kill
 docker-compose -f docker/dev.docker-compose.yml rm -v --force
@@ -59,63 +108,8 @@ The necessary information to construct a harvest start message for the weibo har
 * count for weibos
 
 
+#Weibowarchtml
 
-# Weibowarc<a name="weibowarc"></a>
-The python library for archiving weibo friendship timeline.
-
-##How to use
-###Installing
-
-```bash
-git clone https://github.com/gwu-libraries/weibowarc.git
-cd weibowarc
-pip install -r requirements.txt
-```
-
-Also, it can be included as a dependency by adding the following to `requirements.txt`:
-
-```bash
-git+https://github.com/gwu-libraries/weibowarc.git@master#egg=weibowarc
-```
-
-###Ready to work
-* Sign up for a Sina developer account at [Sina Development Platform](http://open.weibo.com/apps) to create a new app.
-* Get the information about `API_KEY`, `API_SECRET`, `REDIRECT_URI`.
-* How to get these information you can refer to the [API guide](https://www.cs.cmu.edu/~lingwang/weiboguide/).
-
-###Get a token Authentication
-* Get the authorize url
-```python
-    >>> from weibo import Client
-    >>> c = Client(API_KEY, API_SECRET, REDIRECT_URI)
-    >>> c.authorize_url
-    'https://api.weibo.com/oauth2/authorize?redirect_uri=http%3A%2F%2F&client_id=123456'
-```    
-* Open the authorize url in your local browser
-* Login with your weibo account or click the '授权'(Authorized) button to get the code in the return URL marked as 'code='
-* Set authorize code
-```python
-    >>> c.set_code('codecodecode')
-```
-* Get the `ACCESS_TOKEN`.
-```python
-    >>> c.token
-    {u'access_token': u'abcd',u'remind_in': u'123456', u'uid': u'123456', u'expires_at': 1609785214}
-```  
-
-###Follower the collecting users manually  
-This step is really subject to the limitation of API calling. 
-
-###Harvesting through [friends_timeline](http://open.weibo.com/wiki/2/statuses/friends_timeline)
-Using the `API_KEY`, `API_SECRET`, `REDIRECT_URI`, `ACCESS_TOKEN` above to get the posts.
-
-```bash
-weibowarc.py -s --api_key apikey --api_secret apiscecret --redirect_uri uri --access_token accesstoken 
-```  
-
-It will return the nearest 150 weibo posts among all the followers of the current user.
-
-#Weibowarchtml<a name="weibowarchtml"></a>
 ##How to use
 To use the weibowarchtml, you need to give your `USERNAME`,`PASSWORD` with your sina account  
 

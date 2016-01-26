@@ -41,7 +41,8 @@ class TestWeiboHarvesterVCR(tests.TestCase):
             "collection": {
                 "id": "test_collection",
                 "path": "/collections/test_collection"
-            }
+            },
+            "options": {}
         }
 
     @vcr.use_cassette()
@@ -50,6 +51,15 @@ class TestWeiboHarvesterVCR(tests.TestCase):
         #check the total number
         self.assertGreaterEqual(self.harvester.harvest_result.summary["weibo"], 0)
         #check the harvester status
+        self.assertTrue(self.harvester.harvest_result.success)
+
+    @vcr.use_cassette()
+    def test_incremental_search_vcr(self):
+        self.harvester.message["options"]["incremental"] = True
+        self.harvester.state_store.set_state("weibo_harvester", "weibo.since_id", 3935747172100551)
+        self.harvester.harvest_seeds()
+
+        # Check harvest result
         self.assertTrue(self.harvester.harvest_result.success)
 
 
@@ -181,7 +191,6 @@ class TestWeiboHarvesterIntegration(tests.TestCase):
             self.assertTrue(message_obj, "Timed out waiting for result at {}.".format(datetime.now()))
 
             result_msg = message_obj.payload
-            print result_msg
             # Matching ids
             self.assertEqual("test:1", result_msg["id"])
             # Success
