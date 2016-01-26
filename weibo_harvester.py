@@ -49,7 +49,7 @@ class WeiboHarvester(BaseHarvester):
     def _process_weibos(self, weibos):
         max_weibo_id = None
         for count, weibo in enumerate(weibos):
-            if not count % 150:
+            if not count % 100:
                 log.debug("Processed %s weibo", count)
             if self.stop_event.is_set():
                 log.debug("Stopping since stop event set.")

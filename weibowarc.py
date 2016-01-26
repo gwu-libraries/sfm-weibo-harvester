@@ -239,19 +239,14 @@ class Weibowarc(object):
             'count': 100,
             'page': 1
         }
-        # count the number of post in first page
-        page_count = 0
+
         while True:
             if since_id:
                 params['since_id'] = since_id
             if max_id:
                 params['max_id'] = max_id
-            if page_count > 100:
-                params['page'] = 2
-                # time.sleep(2)
 
             resp = self.get(friendships_url, **params)
-            # print resp
             statuses = resp[u'statuses']
 
             if len(statuses) == 0:
@@ -259,7 +254,6 @@ class Weibowarc(object):
                 break
 
             for status in statuses:
-                page_count += 1
                 """
                 the application level need deal the retweeted text.
                 if u'retweeted_status' in status and status[u'retweeted_status'] is not None:
@@ -269,7 +263,7 @@ class Weibowarc(object):
 
             max_id = str(int(status[u'mid']) - 1)
 
-    def get_long_urls(self,urls_short):
+    def get_long_urls(self, urls_short):
         log.info("starting get long urls for short url:%s.", urls_short)
         longurls_url = "short_url/expand"
         params = {

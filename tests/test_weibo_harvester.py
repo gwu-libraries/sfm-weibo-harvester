@@ -1,5 +1,5 @@
 import tests
-#import vcr as base_vcr
+import vcr as base_vcr
 from tests.weibos import weibo1,weibo2
 import unittest
 from mock import MagicMock, patch,call
@@ -14,7 +14,7 @@ from datetime import datetime
 from weibo_harvester import WeiboHarvester
 from weibowarc import Weibowarc
 
-"""
+
 vcr = base_vcr.VCR(
         cassette_library_dir='tests/fixtures',
         record_mode='once',
@@ -45,19 +45,13 @@ class TestWeiboHarvesterVCR(tests.TestCase):
         }
 
     @vcr.use_cassette()
-    @patch.object(Weibowarc, "search_friendships")
-    def test_search_vcr(self, mock_search_friendships_method):
+    def test_search_vcr(self):
         self.harvester.harvest_seeds()
-        #self.assertDictEqual({"weibo": 150}, self.harvester.harvest_result.summary)
-        #mock_weibowarc_class.assert_called_once_with(tests.WEIBO_API_KEY, tests.WEIBO_API_SECRET,
-        #                                             tests.WEIBO_REDIRECT_URI, tests.WEIBO_ACCESS_TOKEN)
+        #check the total number
+        self.assertGreaterEqual(self.harvester.harvest_result.summary["weibo"], 0)
+        #check the harvester status
+        self.assertTrue(self.harvester.harvest_result.success)
 
-        #self.assertTrue(self.harvester.harvest_result.success)
-        # self.assertEqual([call(since_id=None)], mock_weibowarc_class.search_friendships.mock_calls)
-        # Nothing added to state
-        #self.assertEqual(0, len(self.harvester.state_store._state))
-
-"""
 
 class TestWeiboHarvester(tests.TestCase):
     def setUp(self):
