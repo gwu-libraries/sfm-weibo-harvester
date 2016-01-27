@@ -8,8 +8,10 @@ setup(
     author_email='tanych5233@gmail.com',
     description="Social Feed Manager Weibo Harvester",
     platforms=['POSIX'],
-    py_modules=['weibo_harvester',],
+    test_suite='tests',
+    py_modules=['weibo_harvester','weibowarc','weibowarchtml'],
     install_requires=['sfmutils', 'weibo>=0.2.2', 'beautifulsoup4'],
+    tests_require=['mock>=1.3.0'],
     classifiers=[
         'Intended Audience :: Developers',
         'Topic :: Software Development :: Libraries :: Python Modules',

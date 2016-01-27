@@ -10,6 +10,7 @@ import threading
 import shutil
 import tempfile
 import time
+import os
 from datetime import datetime
 from weibo_harvester import WeiboHarvester
 from weibowarc import Weibowarc
@@ -49,7 +50,7 @@ class TestWeiboHarvesterVCR(tests.TestCase):
     def test_search_vcr(self):
         self.harvester.harvest_seeds()
         #check the total number
-        self.assertGreaterEqual(self.harvester.harvest_result.summary["weibo"], 0)
+        self.assertEqual(self.harvester.harvest_result.summary["weibo"], 181)
         #check the harvester status
         self.assertTrue(self.harvester.harvest_result.success)
 
@@ -61,6 +62,9 @@ class TestWeiboHarvesterVCR(tests.TestCase):
 
         # Check harvest result
         self.assertTrue(self.harvester.harvest_result.success)
+        self.assertEqual(self.harvester.harvest_result.summary["weibo"], 5)
+        #check the state
+        self.assertEqual(3935776104305071, self.harvester.state_store.get_state("weibo_harvester", "weibo.since_id"))
 
 
 class TestWeiboHarvester(tests.TestCase):
@@ -157,11 +161,12 @@ class TestWeiboHarvesterIntegration(tests.TestCase):
         self.collection_path = tempfile.mkdtemp()
 
     def tearDown(self):
+        #print self.collection_path
         shutil.rmtree(self.collection_path, ignore_errors=True)
 
     def test_search(self):
         harvest_msg = {
-            "id": "test:1",
+            "id": "test:3",
             "type": "weibo_timeline",
             "credentials": {
                 "api_key": tests.WEIBO_API_KEY,
@@ -192,7 +197,7 @@ class TestWeiboHarvesterIntegration(tests.TestCase):
 
             result_msg = message_obj.payload
             # Matching ids
-            self.assertEqual("test:1", result_msg["id"])
+            self.assertEqual("test:3", result_msg["id"])
             # Success
             self.assertEqual("completed success", result_msg["status"])
             # Some weibo posts
@@ -207,3 +212,6 @@ class TestWeiboHarvesterIntegration(tests.TestCase):
             bound_warc_created_queue = self.warc_created_queue(connection)
             message_obj = bound_warc_created_queue.get(no_ack=True)
             self.assertIsNotNone(message_obj, "No warc created message.")
+            #check path exist
+            warc_msg = message_obj.payload
+            self.assertTrue(os.path.isfile(warc_msg["warc"]["path"]))
