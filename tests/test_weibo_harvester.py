@@ -21,8 +21,8 @@ vcr = base_vcr.VCR(
         record_mode='once',
     )
 
+
 @unittest.skipIf(not tests.test_config_available, "Skipping test since test config not available.")
-@unittest.skipIf(not tests.integration_env_available, "Skipping test since integration env not available.")
 class TestWeiboHarvesterVCR(tests.TestCase):
     def setUp(self):
         self.harvester = WeiboHarvester()

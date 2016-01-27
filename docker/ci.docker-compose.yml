@@ -9,4 +9,9 @@ sfmweiboharvester:
         - sfmrabbit:mq
     volumes:
         - "..:/opt/sfm-weibo-harvester"
+    environment:
+        - WEIBO_API_KEY
+        - WEIBO_API_SECRET
+        - WEIBO_REDIRECT_URI
+        - WEIBO_ACCESS_TOKEN
     command: bash -c "pip install -r requirements.txt --upgrade && appdeps.py --port-wait mq:5672 && python weibo_harvester.py service mq $MQ_ENV_RABBITMQ_DEFAULT_USER $MQ_ENV_RABBITMQ_DEFAULT_PASS --debug"
