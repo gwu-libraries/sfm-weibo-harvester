@@ -32,4 +32,3 @@ class TestCase(unittest.TestCase):
     logging.getLogger("weibowarc").setLevel(logging.DEBUG)
     logging.getLogger("requests").setLevel(logging.ERROR)
     logging.getLogger("vcr").setLevel(logging.INFO)
-    logging.getLogger("unittest").setLevel(logging.DEBUG)

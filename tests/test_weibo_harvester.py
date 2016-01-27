@@ -156,7 +156,6 @@ class TestWeiboHarvesterIntegration(tests.TestCase):
             self.web_harvest_queue(connection).purge()
             self.warc_created_queue(connection).declare()
             self.warc_created_queue(connection).purge()
-            weibo_harvester_queue(connection).declare()
             weibo_harvester_queue(connection).purge()
 
         self.collection_path = tempfile.mkdtemp()
