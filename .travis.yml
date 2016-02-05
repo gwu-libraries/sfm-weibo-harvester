@@ -6,6 +6,7 @@ services:
 - docker
 before_install:
 - sudo pip install -U docker-compose==1.5.2
+- docker-compose -f docker/ci.docker-compose.yml pull
 - docker-compose -f docker/ci.docker-compose.yml up -d
 - docker exec docker_sfmweiboharvester_1 python -m unittest discover
 script: python -m unittest discover
