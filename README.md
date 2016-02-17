@@ -5,9 +5,9 @@ A basic harvester for Sina Weibo public post data as part of Social Feed Manager
 
 Provides harvesters for [Sina Weibo API](http://open.weibo.com/wiki/%E5%BE%AE%E5%8D%9AAPI) and [Html Parser](http://www.crummy.com/software/BeautifulSoup/bs4/doc/)
 
-Harvesting is performed by weibowarc.
+Harvesting is performed by weiboarc.
 
-The [weibowarchtml](#weibowarchtml) is just a possible solution for any exist limitation problem. If possible, the weibo harvester will rely mostly on the API calling.
+The [weiboarchtml](#weiboarchtml) is just a possible solution for any exist limitation problem. If possible, the weibo harvester will rely mostly on the API calling.
 
 # Install
 ```bash
@@ -109,17 +109,19 @@ The necessary information to construct a harvest start message for the weibo har
 * count for weibos
 
 
-#Weibowarchtml
+#Weiboarchtml
+
+**Marked as invalid since the login page adding the verify code, update 02/17/2016**
 
 ##How to use
-To use the weibowarchtml, you need to give your `USERNAME`,`PASSWORD` with your sina account  
+To use the weiboarchtml, you need to give your `USERNAME`,`PASSWORD` with your sina account  
 
 ##Getting a full list of followers
 Usually, It can call the [friends API](http://open.weibo.com/wiki/2/friendships/friends) to get the full list of following friends.However, the API calling only results 30% of them.
 Currently, a full list of followers can get through the html parser analyzing the simple [mobile website](http://weibo.cn/) contents, since it hasn't decorated with css or javascript. 
 
 ```bash
-weibowarchtml.py --followlist --username 'username' --password 'password'
+weiboarchtml.py --followlist --username 'username' --password 'password'
 ```  
 
 ##Search key words
@@ -127,13 +129,13 @@ Since the same reason of limitation of API calling, searing key word also rely o
 It can return the user name and text of the weibo post.
 
 ```bash
-weibowarchtml.py --search '郭德纲'  --username 'username' --password 'password'
+weiboarchtml.py --search '郭德纲'  --username 'username' --password 'password'
 ```  
 
 ##Follow or Unfollow users
 When you try to follow someone using the [friends create API](http://open.weibo.com/wiki/2/friendships/create), it won't work. What can do is parsing the html request for adding a friend. 
 
 ```bash
-weibowarchtml.py --follow 12345 1234 123
+weiboarchtml.py --follow 12345 1234 123
 ```  
 Simulating the request data in the http session is a solution for following the special uids, it's very similar for unfollowing users.However, it's not as efficient as calling API.

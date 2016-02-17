@@ -2,14 +2,14 @@ from setuptools import setup
 
 setup(
     name='sfmweiboharvester',
-    version='0.1.0',
+    version='0.2.0',
     url='https://github.com/gwu-libraries/sfm-weibo-harvester',
     author='Vict Tan',
     author_email='tanych5233@gmail.com',
     description="Social Feed Manager Weibo Harvester",
     platforms=['POSIX'],
     test_suite='tests',
-    py_modules=['weibo_harvester','weibowarc','weibowarchtml'],
+    py_modules=['weibo_harvester','weiboarc','weiboarchtml'],
     install_requires=['sfmutils', 'weibo>=0.2.2', 'beautifulsoup4'],
     tests_require=['mock>=1.3.0'],
     classifiers=[
