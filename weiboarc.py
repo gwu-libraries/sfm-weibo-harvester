@@ -3,7 +3,6 @@
 
 from __future__ import absolute_import
 import os
-import sys
 import logging
 import time
 import json
@@ -11,20 +10,9 @@ import requests
 from weibo import Client
 import argparse
 from datetime import datetime, timedelta
+from twarc import load_config, default_config_filename, save_keys, get_input, catch_conn_reset
 
 log = logging.getLogger(__name__)
-
-try:
-    import configparser  # Python 3
-except ImportError:
-    import ConfigParser as configparser  # Python 2
-
-if sys.version_info[:2] <= (2, 7):
-    # Python 2
-    get_input = raw_input
-else:
-    # Python 3
-    get_input = input
 
 
 # Error code for weibo api
@@ -34,12 +22,12 @@ else:
 
 def main():
     """
-    The testing command line for the weibo warc
+    The testing command line for the weibo archive
     refer https://github.com/edsu/twarc/blob/master/twarc.py
     :return:
     """
 
-    parser = argparse.ArgumentParser("weibowarc")
+    parser = argparse.ArgumentParser("weiboarc")
     parser.add_argument('-s', '--stimeline', action='store_true', required=True,
                         help="archive weibos in friendship timeline")
     parser.add_argument("--max_id", dest="max_id",
@@ -47,7 +35,7 @@ def main():
     parser.add_argument("--since_id", dest="since_id",
                         help="smallest id to search for")
     parser.add_argument("--log", dest="log",
-                        default="weibowarc.log", help="log file")
+                        default="weiboarc.log", help="log file")
     parser.add_argument("--api_key",
                         default=None, help="Weibo API key")
     parser.add_argument("--api_secret",
@@ -75,125 +63,56 @@ def main():
     # get the api key
     api_key = args.api_key or os.environ.get('API_KEY')
     api_secret = args.api_secret or os.environ.get('API_SECRET')
-    redirect_uri = args.redirect_uri or os.environ.get('REDIRECT_URI')
     access_token = args.access_token or os.environ.get("ACCESS_TOKEN")
+    redirect_uri = args.redirect_uri or os.environ.get('REDIRECT_URI')
 
     if not (api_key and api_secret and
-            redirect_uri and access_token):
+            access_token and redirect_uri):
         credentials = load_config(args.config, args.profile)
         if credentials:
-            api_key = credentials['api_key']
-            api_secret = credentials['api_secret']
-            redirect_uri = credentials['redirect_uri']
+            api_key = credentials['consumer_key']
+            api_secret = credentials['consumer_secret']
             access_token = credentials['access_token']
+            # for weibo is the redirect uri
+            redirect_uri = credentials['access_token_secret']
         else:
             print("Please enter weibo authentication credentials")
             api_key = get_input('api key: ')
             api_secret = get_input('api secret: ')
-            redirect_uri = get_input('redirect_uri: ')
             access_token = get_input('access_token: ')
+            redirect_uri = get_input('redirect_uri: ')
             save_keys(args.profile, api_key, api_secret,
-                      redirect_uri, access_token)
+                      access_token, redirect_uri)
 
-    weibowarc = Weibowarc(api_key=api_key,
-                          api_secret=api_secret,
-                          redirect_uri=redirect_uri,
-                          access_token=access_token)
+    weiboarc = Weiboarc(api_key=api_key,
+                        api_secret=api_secret,
+                        redirect_uri=redirect_uri,
+                        access_token=access_token)
 
     if args.stimeline:
-        weibos = weibowarc.search_friendships(since_id=args.since_id, max_id=args.max_id)
+        weibos = weiboarc.search_friendships(since_id=args.since_id, max_id=args.max_id)
     else:
         raise argparse.ArgumentTypeError("-s  is required for the command.")
 
     for weibo in weibos:
         if u'mid' in weibo or args.warnings:
             print(json.dumps(weibo))
-        # adding log infor
+        # adding log info
         if u'mid' in weibo:
             log.info("archived weibo [%s]:[%s]", weibo[u'user'][u'screen_name'], weibo[u"mid"])
         else:
             log.warn(json.dumps(weibo))
 
 
-def save_config(filename, profile,
-                api_key, api_secret,
-                redirect_uri, access_token):
-    config = configparser.ConfigParser()
-    config.add_section(profile)
-    config.set(profile, 'api_key', api_key)
-    config.set(profile, 'api_secret', api_secret)
-    config.set(profile, 'redirect_uri', redirect_uri)
-    config.set(profile, 'access_token', access_token)
-    with open(filename, 'w') as config_file:
-        config.write(config_file)
-
-
-def save_keys(profile, api_key, api_secret,
-              redirect_uri, access_token):
+class Weiboarc(object):
     """
-    Save keys to ~/.weibowarc
-    """
-    filename = default_config_filename()
-    save_config(filename, profile,
-                api_key, api_secret,
-                redirect_uri, access_token)
-    print("Keys saved to", filename)
-
-
-def load_config(filename, profile):
-    if not os.path.isfile(filename):
-        return None
-    config = configparser.ConfigParser()
-    config.read(filename)
-    data = {}
-    for key in ['access_token', 'redirect_uri', 'api_key', 'api_secret']:
-        try:
-            data[key] = config.get(profile, key)
-        except configparser.NoSectionError:
-            sys.exit("no such profile %s in %s" % (profile, filename))
-        except configparser.NoOptionError:
-            sys.exit("missing %s from profile %s in %s" % (key, profile, filename))
-    return data
-
-
-def default_config_filename():
-    """
-    Return the default filename for storing Weibo keys.
-    """
-    home = os.path.expanduser("~")
-    return os.path.join(home, ".weibowarc")
-
-
-def catch_conn_reset(fun):
-    """
-    A decorator to handle connection reset errors even ones from pyOpenSSL
-    until https://github.com/edsu/twarc/issues/72 is resolved
-    """
-    try:
-        import OpenSSL
-        ConnError = OpenSSL.SSL.SysCallError
-    except:
-        ConnError = requests.exceptions.ConnectionError
-
-    def new_f(self, *args, **kwargs):
-        try:
-            return fun(self, *args, **kwargs)
-        except ConnError:
-            self._connect()
-            return fun(self, *args, **kwargs)
-
-    return new_f
-
-
-class Weibowarc(object):
-    """
-    Weibowarc allows you to connect the API with the four parameters,
+    Weiboarc allows you to connect the API with the four parameters,
     get data from the friendships API.
     """
 
     def __init__(self, api_key, api_secret, redirect_uri, access_token):
         """
-        Instantiate a Weibowarc instance. Make sure your  variables
+        Instantiate a Weiboarc instance. Make sure your  variables
         are set.
         """
 
@@ -355,12 +274,13 @@ class Weibowarc(object):
         token = {'access_token': self.access_token, 'uid': '', 'expires_at': 1609785214}
         try:
             self.client = Client(api_key=self.api_key,
-                                api_secret=self.api_secret,
-                                redirect_uri=self.redirect_uri,
-                                token=token)
+                                 api_secret=self.api_secret,
+                                 redirect_uri=self.redirect_uri,
+                                 token=token)
         except Exception, e:
             log.error("creating client session error,%s", e)
             raise e
+
 
 if __name__ == "__main__":
     main()

@@ -20,11 +20,11 @@ else:
 
 def main():
     """
-    The testing command line for the weibo warc html
+    The testing command line for the weibo archive html
     :return:
     """
 
-    parser = argparse.ArgumentParser("weibowarchtml")
+    parser = argparse.ArgumentParser("weiboarchtml")
     parser.add_argument("--search", dest="search",
                         help="search for weibos matching a keywords")
     parser.add_argument("--max_page",
@@ -36,7 +36,7 @@ def main():
     parser.add_argument("--followlist", action='store_true',dest="followlist",
                         help="get the followlist of current user")
     parser.add_argument("--log", dest="log",
-                        default="weibowarchtml.log", help="log file")
+                        default="weiboarchtml.log", help="log file")
     parser.add_argument("--username",
                         default=None, help="Weibo username")
     parser.add_argument("--password",
@@ -60,7 +60,7 @@ def main():
         username = get_input('username: ')
         password = getpass.getpass('password: ')
 
-    weibohtml = WeibowarcHtml(username=username, password=password)
+    weibohtml = WeiboarcHtml(username=username, password=password)
 
     if args.search:
         weibos = weibohtml.search_word(key_word=args.search, max_page_num=args.max_page)
@@ -83,9 +83,9 @@ def main():
         raise argparse.ArgumentTypeError("search, follow, unfollow or followlist is required for the command.")
 
 
-class WeibowarcHtml(object):
+class WeiboarcHtml(object):
     """
-    WeibowarcHtml allows you to login weibo to mobile page using
+    WeiboarcHtml allows you to login weibo to mobile page using
     the username, password. Getting the whole friendship of the login user.
     refer from  https://github.com/wangdashuaihenshuai/weibo/blob/master/weibo.py
     """
@@ -117,6 +117,7 @@ class WeibowarcHtml(object):
         self._assert_error(res)
 
         soup = BeautifulSoup(page.text, "html.parser")
+        print soup
         try:
             self.uid = soup.find("div", "tip2").a["href"].split('/')[1]
             self.st_num = soup.find("div", "pms").form["action"].split('st=')[1]

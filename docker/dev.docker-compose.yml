@@ -13,6 +13,7 @@ sfmweiboharvester:
     volumes:
         - "..:/opt/sfm-weibo-harvester"
         - "../../sfm-utils:/opt/sfm-utils"
+        - "../../warcprox:/opt/warcprox"
     environment:
         - DEBUG=True
 #    restart: always

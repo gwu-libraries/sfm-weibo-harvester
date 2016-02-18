@@ -5,10 +5,13 @@ sudo: required
 services:
 - docker
 before_install:
-- sudo pip install -U docker-compose==1.5.2
+- sudo apt-get update
+- sudo apt-get install -y -o Dpkg::Options::="--force-confnew" docker-engine
+- sudo pip install -U docker-compose
 - docker-compose -f docker/ci.docker-compose.yml pull
 - docker-compose -f docker/ci.docker-compose.yml up -d
 - docker exec docker_sfmweiboharvester_1 python -m unittest discover
+install: pip install -r requirements/requirements.txt
 script: python -m unittest discover
 notifications:
   email:

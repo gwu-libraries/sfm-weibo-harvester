@@ -4,7 +4,7 @@
 from __future__ import absolute_import
 import logging
 from sfmutils.harvester import BaseHarvester
-from weibowarc import Weibowarc
+from weiboarc import Weiboarc
 
 log = logging.getLogger(__name__)
 
@@ -15,10 +15,10 @@ ROUTING_KEY = "harvest.start.weibo.*"
 class WeiboHarvester(BaseHarvester):
     def __init__(self, process_interval_secs=1200, mq_config=None, debug=False):
         BaseHarvester.__init__(self, mq_config=mq_config, process_interval_secs=process_interval_secs, debug=debug)
-        self.weibowarc = None
+        self.weiboarc = None
 
     def harvest_seeds(self):
-        self._create_weibowarc()
+        self._create_weiboarc()
 
         harvest_type = self.message.get("type")
         log.debug("Harvest type is %s", harvest_type)
@@ -32,7 +32,7 @@ class WeiboHarvester(BaseHarvester):
 
         # Get since_id from state_store
         since_id = self.state_store.get_state(__name__, "{}.since_id".format('weibo')) if incremental else None
-        max_weibo_id = self._process_weibos(self.weibowarc.search_friendships(since_id=since_id))
+        max_weibo_id = self._process_weibos(self.weiboarc.search_friendships(since_id=since_id))
         log.debug("Searching since %s returned %s weibo.",
                     since_id, self.harvest_result.summary.get("weibo"))
 
@@ -40,8 +40,8 @@ class WeiboHarvester(BaseHarvester):
         if incremental and max_weibo_id:
                 self.state_store.set_state(__name__, "{}.since_id".format('weibo'), max_weibo_id)
 
-    def _create_weibowarc(self):
-        self.weibowarc = Weibowarc(self.message["credentials"]["api_key"],
+    def _create_weiboarc(self):
+        self.weiboarc = Weiboarc(self.message["credentials"]["api_key"],
                                    self.message["credentials"]["api_secret"],
                                    self.message["credentials"]["redirect_uri"],
                                    self.message["credentials"]["access_token"])
