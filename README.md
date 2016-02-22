@@ -18,15 +18,24 @@ pip install -r requirements.txt
 
 # Ready to work
 * Sign up for a Sina developer account at [Sina Development Platform](http://open.weibo.com/apps) to create a new app.
-* Get the information about `WEIBO_API_KEY`, `WEIBO_API_SECRET`, `WEIBO_REDIRECT_URI`.
+* Get the information about `WEIBO_API_KEY`, `WEIBO_API_SECRET`, `WEIBO_REDIRECT_URI`,`WEIBO_ACCESS_TOKEN`.
 * The corresponding information got from the guide is no prefix `WEIBO_`.
-* How to get these information you can refer to the [API guide](http://tanych.github.io/weibo/apiguide/).
+* How to get these information you can refer to the [Guide for Using Weibo API](http://tanych.github.io/weibo/apiguide/).
 
-# Get a token authentication
-* Get the authorize url
+# Get a token authentication in terminal
+If you already get the  `WEIBO_ACCESS_TOKEN` from the above guide, please **SKIP** this step.
+
+*  Assume the `WEIBO_API_KEY`, `WEIBO_API_SECRET`, `WEIBO_REDIRECT_URI` get from above step would be as follow, yours must be different:
 ```python
+    WEIBO_API_KEY = "123456789"
+    WEIBO_API_SECRET = "34567890123312"
+    WEIBO_REDIRECT_URI = "https://www.google.com"
+```
+* Set the information and get the authorize url
+```python
+    $python
     >>> from weibo import Client
-    >>> c = Client(API_KEY, API_SECRET, REDIRECT_URI)
+    >>> c = Client('123456789', '34567890123312', 'https://www.google.com')
     >>> c.authorize_url
     'https://api.weibo.com/oauth2/authorize?redirect_uri=http%3A%2F%2F&client_id=123456'
 ```    
@@ -60,7 +69,7 @@ python -m unittest discover
 * Install [Docker](https://docs.docker.com/installation/) and [Docker-Compose](https://docs.docker.com/compose/install/)
 
 * Provide  the `WEIBO_API_KEY`, `WEIBO_API_SECRET`, `WEIBO_REDIRECT_URI`, `WEIBO_ACCESS_TOKEN` to the tests. This can be done either by putting them in a file named test_config.py or in environment variables (`WEIBO_API_KEY`, `WEIBO_API_SECRET`, `WEIBO_REDIRECT_URI`, `WEIBO_ACCESS_TOKEN`). An example test_config.py looks like:
-```bash
+```python
 WEIBO_API_KEY = "123456789"
 WEIBO_API_SECRET = "34567890123312"
 WEIBO_REDIRECT_URI = "https://www.google.com"
