@@ -28,4 +28,3 @@ vcrpy==1.7.4
 urllib3==1.14
 warc==0.2.1
 warctools==4.9.0
-weibo==0.2.2

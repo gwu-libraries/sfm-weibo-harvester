@@ -7,7 +7,6 @@ import logging
 import time
 import json
 import requests
-from weibo import Client
 import argparse
 from datetime import datetime, timedelta
 from twarc import load_config, default_config_filename, save_keys, get_input, catch_conn_reset
@@ -104,6 +103,41 @@ def main():
             log.warn(json.dumps(weibo))
 
 
+def status_error(f):
+    """
+    A decorator to handle http response error from the Weibo API.
+    refer: https://github.com/edsu/twarc/blob/master/twarc.py
+    """
+    def new_f(*args, **kwargs):
+        errors = 0
+        while True:
+            resp = f(*args, **kwargs)
+            if resp.status_code == 200:
+                errors = 0
+                return resp
+            elif resp.status_code == 404:
+                errors += 1
+                logging.warn("404:Not found url! Sleep 1s to try again...")
+                if errors > 10:
+                    logging.warn("Too many errors 404, stop!")
+                    resp.raise_for_status()
+                logging.warn("%s from request URL, sleeping 1s", resp.status_code)
+                time.sleep(1)
+
+            # deal with the response error
+            elif resp.status_code >= 500:
+                errors += 1
+                if errors > 30:
+                    logging.warn("Too many errors from Weibo REST API Server, stop!")
+                    resp.raise_for_status()
+                seconds = 60 * errors
+                logging.warn("%s from Weibo REST API Server, sleeping %d", resp.status_code, seconds)
+                time.sleep(seconds)
+            else:
+                resp.raise_for_status()
+    return new_f
+
+
 class Weiboarc(object):
     """
     Weiboarc allows you to connect the API with the four parameters,
@@ -121,29 +155,6 @@ class Weiboarc(object):
         self.redirect_uri = redirect_uri
         self.access_token = access_token
         self._connect()
-
-    def search_friends_list(self):
-        """
-        Try to get the all the users followed by the current user, but it only returns
-        30% of users haven't give right to the application
-        :return:
-        """
-        log.info("starting search for friend.")
-        friends_url = "friendships/friends"
-
-        params = {'count': 100}
-
-        params['uid'] = self.user_id()[u'uid']
-
-        resp = self.get(friends_url, **params)
-        statuses = resp[u'users']
-
-        if len(statuses) == 0:
-            log.info("no new weibo friendlist matching %s", params)
-            return
-
-        for status in statuses:
-            yield status
 
     def search_friendships(self, max_id=None, since_id=None):
         """
@@ -166,7 +177,7 @@ class Weiboarc(object):
                 params['max_id'] = max_id
 
             resp = self.get(friendships_url, **params)
-            statuses = resp[u'statuses']
+            statuses = resp.json()['statuses']
 
             if len(statuses) == 0:
                 log.info("no new weibo post matching %s", params)
@@ -182,29 +193,26 @@ class Weiboarc(object):
 
             max_id = str(int(status[u'mid']) - 1)
 
-    def get_long_urls(self, urls_short):
-        log.info("starting get long urls for short url:%s.", urls_short)
-        longurls_url = "short_url/expand"
-        params = {
-            'url_short': urls_short
-        }
-
-        resp = self.get(longurls_url, **params)
-        # print resp
-        urls = resp[u'urls']
-
-        for url in urls:
-            yield url
-
+    @status_error
     @catch_conn_reset
     def get(self, *args, **kwargs):
         try:
-            return self.client.get(*args, **kwargs)
-        except RuntimeError, e:
-            log.error("caught runtime error %s", e)
-            error_code = ''.join(e)[0:5]
-            if error_code in ['10022', '10023', '10024']:
-                time.sleep(self.wait_time())
+            r = self.client.get(*args, **kwargs)
+            # if rate limit reach
+            if r.status_code == 403:
+                seconds = self.wait_time()
+                logging.warn("Rate limit 403 from Weibo API, Sleep %d to try...",seconds)
+                time.sleep(seconds)
+                r = self.get(*args, **kwargs)
+            return r
+        except APIError, e:
+            # if rate limit reach
+            log.error("caught APIError error %s", e)
+            if e.error_code in [10022, 10023, 10024]:
+                seconds = self.wait_time()
+                logging.warn("Rate limit %d from Weibo API, Sleep %d to try...", e.error_code, seconds)
+                time.sleep(seconds)
+                return self.get(*args, **kwargs)
             else:
                 raise e
         except requests.exceptions.ConnectionError as e:
@@ -212,29 +220,25 @@ class Weiboarc(object):
             self._connect()
             return self.get(*args, **kwargs)
 
+    @status_error
     @catch_conn_reset
     def post(self, *args, **kwargs):
         try:
             return self.client.post(*args, **kwargs)
-        except RuntimeError, e:
-            log.error("caught runtime error %s", e)
-            error_code = ''.join(e)[0:5]
-            if error_code in ['10022', '10023', '10024']:
-                time.sleep(self.wait_time())
+        except APIError, e:
+            # if rate limit reach
+            log.error("caught APIError error %s", e)
+            if e.error_code in [10022, 10023, 10024]:
+                seconds = self.wait_time()
+                logging.warn("Rate limit %d from Weibo API, Sleep %d to try...", e.error_code, seconds)
+                time.sleep(seconds)
+                return self.get(*args, **kwargs)
             else:
                 raise e
         except requests.exceptions.ConnectionError as e:
             log.error("caught connection error %s", e)
             self._connect()
             return self.post(*args, **kwargs)
-
-    def user_id(self):
-        """
-        To get the current user id
-        http://open.weibo.com/wiki/2/account/get_uid
-        """
-        res = self.get('account/get_uid')
-        return res
 
     def rate_limit(self):
         """
@@ -244,7 +248,7 @@ class Weiboarc(object):
         use it to count the sleep time.
         """
         res = self.get('account/rate_limit_status')
-        return res
+        return res.json()
 
     def wait_time(self):
         """
@@ -269,18 +273,94 @@ class Weiboarc(object):
 
     def _connect(self):
         log.info("creating client session with api_key=%s", self.api_key)
-        # create the token
-        # The uid and expires_at actually not used in the following
-        token = {'access_token': self.access_token, 'uid': '', 'expires_at': 1609785214}
         try:
             self.client = Client(api_key=self.api_key,
                                  api_secret=self.api_secret,
                                  redirect_uri=self.redirect_uri,
-                                 token=token)
+                                 access_token=self.access_token)
         except Exception, e:
             log.error("creating client session error,%s", e)
             raise e
 
+
+class APIError(StandardError):
+    """
+    raise APIError if got failed message from the API not the http error.
+    """
+    def __init__(self, error_code, error, request):
+        self.error_code = error_code
+        self.error = error
+        self.request = request
+        StandardError.__init__(self, error)
+
+    def __str__(self):
+        return 'APIError: %s, %s, Request: %s' % (self.error_code, self.error, self.request)
+
+
+class Client(object):
+    """
+    Refer from https://github.com/lxyu/weibo/blob/master/weibo.py
+    Since we need deal withe the http response error code
+    """
+    def __init__(self, api_key, api_secret, redirect_uri, access_token):
+        # const define
+        self.site = 'https://api.weibo.com/'
+        self.authorization_url = self.site + 'oauth2/authorize'
+        self.token_url = self.site + 'oauth2/access_token'
+        self.api_url = self.site + '2/'
+
+        # init basic info, for future api use
+        self.client_id = api_key
+        self.client_secret = api_secret
+        self.redirect_uri = redirect_uri
+
+        self.session = requests.session()
+
+        # activate client directly with given access_token
+        if access_token:
+            self.session.params = {'access_token': access_token}
+
+    def _assert_error(self, d):
+        """
+        Assert if json response is error.
+        """
+        if 'error_code' in d and 'error' in d:
+            raise APIError(d.get('error_code'), d.get('error', ''), d.get('request', ''))
+
+    def get(self, uri, **kwargs):
+        """
+        Request resource by get method.
+        """
+        # 500 test url
+        # self.api_url='https://httpbin.org/status/500'
+
+        url = "{0}{1}.json".format(self.api_url, uri)
+
+        res = self.session.get(url, params=kwargs)
+
+        # other error code with server will be deal in low level app
+        if res.status_code == 200:
+            self._assert_error(res.json())
+        return res
+
+    def post(self, uri, **kwargs):
+        """
+        Request resource by post method.
+        """
+        url = "{0}{1}.json".format(self.api_url, uri)
+
+        if "pic" not in kwargs:
+            res = self.session.post(url, data=kwargs)
+        else:
+            files = {"pic": kwargs.pop("pic")}
+            res = self.session.post(url,
+                                    data=kwargs,
+                                    files=files)
+
+        # other error code with server will be deal in low level app
+        if res.status_code == 200:
+            self._assert_error(res.json())
+        return res
 
 if __name__ == "__main__":
     main()

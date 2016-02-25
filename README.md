@@ -13,7 +13,7 @@ The [weiboarchtml](#weiboarchtml) is just a possible solution for any exist limi
 ```bash
 git clone https://github.com/gwu-libraries/sfm-weibo-harvester
 cd sfm-weibo-harvester
-pip install -r requirements.txt
+pip install -r requirements/requirements.txt
 ```
 
 # Ready to work
@@ -21,35 +21,6 @@ pip install -r requirements.txt
 * Get the information about `WEIBO_API_KEY`, `WEIBO_API_SECRET`, `WEIBO_REDIRECT_URI`,`WEIBO_ACCESS_TOKEN`.
 * The corresponding information got from the guide is no prefix `WEIBO_`.
 * How to get these information you can refer to the [Guide for Using Weibo API](http://tanych.github.io/weibo/apiguide/).
-
-# Get a token authentication in terminal
-If you already get the  `WEIBO_ACCESS_TOKEN` from the above guide, please **SKIP** this step.
-
-*  Assume the `WEIBO_API_KEY`, `WEIBO_API_SECRET`, `WEIBO_REDIRECT_URI` get from above step would be as follow, yours must be different:
-```python
-    WEIBO_API_KEY = "123456789"
-    WEIBO_API_SECRET = "34567890123312"
-    WEIBO_REDIRECT_URI = "https://www.google.com"
-```
-* Set the information and get the authorize url
-```python
-    $python
-    >>> from weibo import Client
-    >>> c = Client('123456789', '34567890123312', 'https://www.google.com')
-    >>> c.authorize_url
-    'https://api.weibo.com/oauth2/authorize?redirect_uri=http%3A%2F%2F&client_id=123456'
-```    
-* Open the authorize url in your local browser
-* Login with your weibo account or click the '授权'(Authorized) button to get the code in the return URL marked as 'code='
-* Set authorize code
-```python
-    >>> c.set_code('codecodecode')
-```
-* Get the `WEIBO_ACCESS_TOKEN`.
-```python
-    >>> c.token
-    {u'access_token': u'abcd',u'remind_in': u'123456', u'uid': u'123456', u'expires_at': 1609785214}
-```  
 
 # Following the users manually  
 *  Login sina weibo account at [here](http://weibo.com)

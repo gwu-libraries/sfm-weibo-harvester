@@ -10,7 +10,7 @@ setup(
     platforms=['POSIX'],
     test_suite='tests',
     py_modules=['weibo_harvester','weiboarc','weiboarchtml'],
-    install_requires=['sfmutils', 'weibo>=0.2.2', 'beautifulsoup4'],
+    install_requires=['sfmutils', 'beautifulsoup4'],
     tests_require=['mock>=1.3.0'],
     classifiers=[
         'Intended Audience :: Developers',

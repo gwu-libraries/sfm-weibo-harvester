@@ -8,6 +8,7 @@ before_install:
 - sudo apt-get update
 - sudo apt-get install -y -o Dpkg::Options::="--force-confnew" docker-engine
 - sudo pip install -U docker-compose
+- sudo pip install --upgrade ndg-httpsclient
 - docker-compose -f docker/ci.docker-compose.yml pull
 - docker-compose -f docker/ci.docker-compose.yml up -d
 - docker exec docker_sfmweiboharvester_1 python -m unittest discover
