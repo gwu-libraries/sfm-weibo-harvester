@@ -6,6 +6,8 @@ RUN apt-get update && apt-get install -y \
 
 #pip set in 7.1.2
 RUN pip install pip==7.1.2
+#Avoid the warning of https
+RUN pip install --upgrade ndg-httpsclient
 
 #copy the requirement
 ADD https://raw.githubusercontent.com/gwu-libraries/sfm-weibo-harvester/dev/requirements/common.txt /tmp/

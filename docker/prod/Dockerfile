@@ -7,6 +7,9 @@ RUN apt-get update && apt-get install -y \
     zip=3.0-8
 #Upgrade pip
 RUN pip install pip==7.1.2
+#Avoid the warning of https
+RUN pip install --upgrade ndg-httpsclient
+
 WORKDIR /tmp
 ADD https://github.com/gwu-libraries/sfm-weibo-harvester/archive/${sfm_harvester_version}.zip /tmp/
 RUN unzip ${sfm_harvester_version}.zip
