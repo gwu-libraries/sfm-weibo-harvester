@@ -9,7 +9,7 @@ setup(
     description="Social Feed Manager Weibo Harvester",
     platforms=['POSIX'],
     test_suite='tests',
-    py_modules=['weibo_harvester','weiboarc','weiboarchtml'],
+    py_modules=['weibo_harvester','weiboarc','weiboarchtml','weibo_warc_iter'],
     install_requires=['sfmutils', 'beautifulsoup4'],
     tests_require=['mock>=1.3.0'],
     classifiers=[
