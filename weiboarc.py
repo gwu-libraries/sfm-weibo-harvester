@@ -3,15 +3,21 @@
 
 from __future__ import absolute_import
 import os
+import sys
 import logging
 import time
 import json
 import requests
 import argparse
 from datetime import datetime, timedelta
-from twarc import load_config, default_config_filename, save_keys, get_input, catch_conn_reset
+from twarc import get_input, catch_conn_reset
 
 log = logging.getLogger(__name__)
+
+try:
+    import configparser  # Python 3
+except ImportError:
+    import ConfigParser as configparser  # Python 2
 
 
 # Error code for weibo api
@@ -27,8 +33,6 @@ def main():
     """
 
     parser = argparse.ArgumentParser("weiboarc")
-    parser.add_argument('-s', '--stimeline', action='store_true', required=True,
-                        help="archive weibos in friendship timeline")
     parser.add_argument("--max_id", dest="max_id",
                         help="maximum weibo id to search for")
     parser.add_argument("--since_id", dest="since_id",
@@ -69,29 +73,26 @@ def main():
             access_token and redirect_uri):
         credentials = load_config(args.config, args.profile)
         if credentials:
-            api_key = credentials['consumer_key']
-            api_secret = credentials['consumer_secret']
+            api_key = credentials['api_key']
+            api_secret = credentials['api_secret']
+            redirect_uri = credentials['redirect_uri']
             access_token = credentials['access_token']
-            # for weibo is the redirect uri
-            redirect_uri = credentials['access_token_secret']
         else:
             print("Please enter weibo authentication credentials")
-            api_key = get_input('api key: ')
-            api_secret = get_input('api secret: ')
-            access_token = get_input('access_token: ')
+            api_key = get_input('api_key: ')
+            api_secret = get_input('api_secret: ')
             redirect_uri = get_input('redirect_uri: ')
+            access_token = get_input('access_token: ')
+
             save_keys(args.profile, api_key, api_secret,
-                      access_token, redirect_uri)
+                      redirect_uri, access_token)
 
     weiboarc = Weiboarc(api_key=api_key,
                         api_secret=api_secret,
                         redirect_uri=redirect_uri,
                         access_token=access_token)
 
-    if args.stimeline:
-        weibos = weiboarc.search_friendships(since_id=args.since_id, max_id=args.max_id)
-    else:
-        raise argparse.ArgumentTypeError("-s  is required for the command.")
+    weibos = weiboarc.search_friendships(since_id=args.since_id, max_id=args.max_id)
 
     for weibo in weibos:
         if u'mid' in weibo or args.warnings:
@@ -101,6 +102,55 @@ def main():
             log.info("archived weibo [%s]:[%s]", weibo[u'user'][u'screen_name'], weibo[u"mid"])
         else:
             log.warn(json.dumps(weibo))
+
+
+def save_config(filename, profile,
+                api_key, api_secret,
+                redirect_uri, access_token):
+    config = configparser.ConfigParser()
+    config.add_section(profile)
+    config.set(profile, 'api_key', api_key)
+    config.set(profile, 'api_secret', api_secret)
+    config.set(profile, 'redirect_uri', redirect_uri)
+    config.set(profile, 'access_token', access_token)
+    with open(filename, 'w') as config_file:
+        config.write(config_file)
+
+
+def save_keys(profile, api_key, api_secret,
+              redirect_uri, access_token):
+    """
+    Save keys to ~/.weibowarc
+    """
+    filename = default_config_filename()
+    save_config(filename, profile,
+                api_key, api_secret,
+                redirect_uri, access_token)
+    print("Keys saved to", filename)
+
+
+def load_config(filename, profile):
+    if not os.path.isfile(filename):
+        return None
+    config = configparser.ConfigParser()
+    config.read(filename)
+    data = {}
+    for key in ['access_token', 'redirect_uri', 'api_key', 'api_secret']:
+        try:
+            data[key] = config.get(profile, key)
+        except configparser.NoSectionError:
+            sys.exit("no such profile %s in %s" % (profile, filename))
+        except configparser.NoOptionError:
+            sys.exit("missing %s from profile %s in %s" % (key, profile, filename))
+    return data
+
+
+def default_config_filename():
+    """
+    Return the default filename for storing Weibo keys.
+    """
+    home = os.path.expanduser("~")
+    return os.path.join(home, ".weiboarc")
 
 
 def status_error(f):
@@ -199,9 +249,9 @@ class Weiboarc(object):
         try:
             r = self.client.get(*args, **kwargs)
             # if rate limit reach
-            if r.status_code == 403:
+            if r.status_code == 429:
                 seconds = self.wait_time()
-                logging.warn("Rate limit 403 from Weibo API, Sleep %d to try...",seconds)
+                logging.warn("Rate limit 429 from Weibo API, Sleep %d to try...",seconds)
                 time.sleep(seconds)
                 r = self.get(*args, **kwargs)
             return r
@@ -219,26 +269,6 @@ class Weiboarc(object):
             log.error("caught connection error %s", e)
             self._connect()
             return self.get(*args, **kwargs)
-
-    @status_error
-    @catch_conn_reset
-    def post(self, *args, **kwargs):
-        try:
-            return self.client.post(*args, **kwargs)
-        except APIError, e:
-            # if rate limit reach
-            log.error("caught APIError error %s", e)
-            if e.error_code in [10022, 10023, 10024]:
-                seconds = self.wait_time()
-                logging.warn("Rate limit %d from Weibo API, Sleep %d to try...", e.error_code, seconds)
-                time.sleep(seconds)
-                return self.get(*args, **kwargs)
-            else:
-                raise e
-        except requests.exceptions.ConnectionError as e:
-            log.error("caught connection error %s", e)
-            self._connect()
-            return self.post(*args, **kwargs)
 
     def rate_limit(self):
         """
@@ -315,10 +345,8 @@ class Client(object):
         self.redirect_uri = redirect_uri
 
         self.session = requests.session()
-
         # activate client directly with given access_token
-        if access_token:
-            self.session.params = {'access_token': access_token}
+        self.session.params = {'access_token': access_token}
 
     def _assert_error(self, d):
         """
@@ -343,24 +371,6 @@ class Client(object):
             self._assert_error(res.json())
         return res
 
-    def post(self, uri, **kwargs):
-        """
-        Request resource by post method.
-        """
-        url = "{0}{1}.json".format(self.api_url, uri)
-
-        if "pic" not in kwargs:
-            res = self.session.post(url, data=kwargs)
-        else:
-            files = {"pic": kwargs.pop("pic")}
-            res = self.session.post(url,
-                                    data=kwargs,
-                                    files=files)
-
-        # other error code with server will be deal in low level app
-        if res.status_code == 200:
-            self._assert_error(res.json())
-        return res
 
 if __name__ == "__main__":
     main()
