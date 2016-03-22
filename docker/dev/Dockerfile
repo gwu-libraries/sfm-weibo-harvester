@@ -10,8 +10,8 @@ RUN pip install pip==7.1.2
 RUN pip install --upgrade ndg-httpsclient
 
 #copy the requirement
-ADD https://raw.githubusercontent.com/gwu-libraries/sfm-weibo-harvester/dev/requirements/common.txt /tmp/
-ADD https://raw.githubusercontent.com/gwu-libraries/sfm-weibo-harvester/dev/requirements/requirements.txt /tmp/
+ADD https://raw.githubusercontent.com/gwu-libraries/sfm-weibo-harvester/master/requirements/common.txt /tmp/
+ADD https://raw.githubusercontent.com/gwu-libraries/sfm-weibo-harvester/master/requirements/requirements.txt /tmp/
 
 RUN pip install -r /tmp/requirements.txt
 RUN pip install appdeps
