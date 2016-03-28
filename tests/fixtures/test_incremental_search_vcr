@@ -7,7 +7,7 @@ interactions:
       Connection: [keep-alive]
       User-Agent: [python-requests/2.9.1]
     method: GET
-    uri: https://api.weibo.com/2/statuses/friends_timeline.json?access_token=2.00kQCxKGpYiFYDc41039481c0wvwei&count=100&page=1&since_id=3935747172100551
+    uri: https://api.weibo.com/2/statuses/friends_timeline.json?count=100&page=1&since_id=3935747172100551
   response:
     body:
       string: !!binary |
@@ -93,7 +93,7 @@ interactions:
       Connection: [keep-alive]
       User-Agent: [python-requests/2.9.1]
     method: GET
-    uri: https://api.weibo.com/2/statuses/friends_timeline.json?access_token=2.00kQCxKGpYiFYDc41039481c0wvwei&count=100&max_id=3935747314735303&page=1&since_id=3935747172100551
+    uri: https://api.weibo.com/2/statuses/friends_timeline.json?count=100&max_id=3935747314735303&page=1&since_id=3935747172100551
   response:
     body:
       string: !!binary |
