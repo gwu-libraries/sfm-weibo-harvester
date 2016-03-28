@@ -15,20 +15,10 @@ from datetime import datetime
 from weibo_harvester import WeiboHarvester
 from weiboarc import Weiboarc
 
-
-def weibo_uri_matcher(r1, r2):
-    """
-    Define the weibo uri matcher since the different access_token will get different results,
-    Match the api calling giving the same cassette files
-    """
-    return r1.uri.find('statuses/friends_timeline.json') == r2.uri.find('statuses/friends_timeline.json')
-
 vcr = base_vcr.VCR(
         cassette_library_dir='tests/fixtures',
         record_mode='once',
     )
-vcr.register_matcher('weibo_uri', weibo_uri_matcher)
-vcr.match_on = ['weibo_uri']
 
 
 @unittest.skipIf(not tests.test_config_available, "Skipping test since test config not available.")
@@ -55,7 +45,7 @@ class TestWeiboHarvesterVCR(tests.TestCase):
             "options": {}
         }
 
-    @vcr.use_cassette()
+    @vcr.use_cassette(filter_query_parameters=['access_token'])
     def test_search_vcr(self):
         self.harvester.harvest_seeds()
         # check the total number, for new users don't how to check
@@ -63,10 +53,10 @@ class TestWeiboHarvesterVCR(tests.TestCase):
         # check the harvester status
         self.assertTrue(self.harvester.harvest_result.success)
 
-    @vcr.use_cassette()
+    @vcr.use_cassette(filter_query_parameters=['access_token'])
     def test_incremental_search_vcr(self):
         self.harvester.message["options"]["incremental"] = True
-        self.harvester.state_store.set_state("weibo_harvester", "weibo.since_id", 3935776104305071)
+        self.harvester.state_store.set_state("weibo_harvester", "weibo.since_id", 3935747172100551)
         self.harvester.harvest_seeds()
 
         # Check harvest result
