@@ -49,22 +49,22 @@ class TestWeiboHarvesterVCR(tests.TestCase):
     def test_search_vcr(self):
         self.harvester.harvest_seeds()
         # check the total number, for new users don't how to check
-        self.assertEqual(self.harvester.harvest_result.summary["weibo"], 181)
+        self.assertEqual(self.harvester.harvest_result.summary["weibo"], 149)
         # check the harvester status
         self.assertTrue(self.harvester.harvest_result.success)
 
     @vcr.use_cassette(filter_query_parameters=['access_token'])
     def test_incremental_search_vcr(self):
         self.harvester.message["options"]["incremental"] = True
-        self.harvester.state_store.set_state("weibo_harvester", "weibo.since_id", 3935747172100551)
+        self.harvester.state_store.set_state("weibo_harvester", "weibo.since_id", 3958526269242607)
         self.harvester.harvest_seeds()
 
         # Check harvest result
         self.assertTrue(self.harvester.harvest_result.success)
         # for check the number of get
-        self.assertEqual(self.harvester.harvest_result.summary["weibo"], 5)
+        self.assertEqual(self.harvester.harvest_result.summary["weibo"], 3)
         # check the state
-        self.assertEqual(3935776104305071, self.harvester.state_store.get_state("weibo_harvester", "weibo.since_id"))
+        self.assertEqual(3958546117039373, self.harvester.state_store.get_state("weibo_harvester", "weibo.since_id"))
 
 
 class TestWeiboHarvester(tests.TestCase):

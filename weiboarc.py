@@ -243,6 +243,20 @@ class Weiboarc(object):
 
             max_id = str(int(status[u'mid']) - 1)
 
+    def get_long_urls(self, urls_short):
+        # log.info("starting get long urls for short url:%s.", urls_short)
+        long_urls_url = "short_url/expand"
+        params = {
+            'url_short': urls_short
+        }
+
+        resp = self.get(long_urls_url, **params)
+        # print resp
+        urls = resp.json()['urls']
+
+        for url in urls:
+            yield url
+
     @status_error
     @catch_conn_reset
     def get(self, *args, **kwargs):
