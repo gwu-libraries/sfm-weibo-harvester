@@ -64,3 +64,6 @@ test_config.py
 
 #warc files
 *.warc.gz
+
+#profiler
+*.lprof
