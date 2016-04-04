@@ -1,7 +1,7 @@
 FROM python@sha256:ad39551743b356efda7c61f46019b97d49d1aab01b97f0e6d87c9b34326f3bfe
-MAINTAINER Vict Tan <ychtan@gwu.edu>
+MAINTAINER Vict Tan <ychtan@email.gwu.edu>
 
-ENV sfm_harvester_version 0.2.0
+ENV sfm_harvester_version 0.2.1
 
 RUN apt-get update && apt-get install -y \
     zip=3.0-8
