@@ -32,6 +32,14 @@ class TestWeiboHarvesterVCR(tests.TestCase):
         self.harvester.message = {
             "id": "test:2",
             "type": "weibo_timeline",
+            "seeds": [
+                {
+                    "token": "weibo"
+                },
+                {
+                    "token": "weibo2"
+                }
+            ],
             "credentials": {
                 "api_key": tests.WEIBO_API_KEY,
                 "api_secret": tests.WEIBO_API_SECRET,
@@ -77,6 +85,14 @@ class TestWeiboHarvester(tests.TestCase):
         self.harvester.message = {
             "id": "test:1",
             "type": "weibo_timeline",
+            "seeds": [
+                {
+                    "token": "weibo"
+                },
+                {
+                    "token": "weibo2"
+                }
+            ],
             "credentials": {
                 "api_key": tests.WEIBO_API_KEY,
                 "api_secret": tests.WEIBO_API_SECRET,
@@ -169,6 +185,14 @@ class TestWeiboHarvesterIntegration(tests.TestCase):
         harvest_msg = {
             "id": "test:3",
             "type": "weibo_timeline",
+            "seeds": [
+                {
+                    "token": "weibo"
+                },
+                {
+                    "token": "weibo2"
+                }
+            ],
             "credentials": {
                 "api_key": tests.WEIBO_API_KEY,
                 "api_secret": tests.WEIBO_API_SECRET,
@@ -208,6 +232,9 @@ class TestWeiboHarvesterIntegration(tests.TestCase):
             bound_web_harvest_queue = self.web_harvest_queue(connection)
             message_obj = bound_web_harvest_queue.get(no_ack=True)
             self.assertIsNotNone(message_obj, "No web harvest message.")
+            web_harvest_msg = message_obj.payload
+            # Some seeds
+            self.assertTrue(len(web_harvest_msg["seeds"]))
 
             # Warc created message.
             bound_warc_created_queue = self.warc_created_queue(connection)

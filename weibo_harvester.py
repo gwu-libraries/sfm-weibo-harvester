@@ -32,15 +32,24 @@ class WeiboHarvester(BaseHarvester):
     def search_timeline(self):
         incremental = self.message.get("options", {}).get("incremental", False)
 
-        # Get since_id from state_store
-        since_id = self.state_store.get_state(__name__, "weibo.since_id") if incremental else None
-        max_weibo_id = self._process_weibos(self.weiboarc.search_friendships(since_id=since_id))
-        log.debug("Searching since %s returned %s weibo.",
-                  since_id, self.harvest_result.summary.get("weibo"))
+        """
+        Weibo won't deal anything with seeds, but it need to count the since id separately since
+        different users have different followers.
+        Ideally, the seeds will be only one in weibo collection seedsets, if users add more, ui will ignore the seeds.
+        In order keep more safe, the weibo harvester only take the first element in seeds list as a ID for since id.
+        """
+        # Get since_id flag from first elements in seeds
+        seed_lists = self.message.get("seeds", [])
+        if len(seed_lists):
+            query = seed_lists[0].get("token")
+            since_id = self.state_store.get_state(__name__, "{}.since_id".format(query)) if incremental else None
+            max_weibo_id = self._process_weibos(self.weiboarc.search_friendships(since_id=since_id))
+            log.debug("Searching since %s returned %s weibo.",
+                      since_id, self.harvest_result.summary.get("weibo"))
 
-        # Update state store
-        if incremental and max_weibo_id:
-            self.state_store.set_state(__name__, "weibo.since_id", max_weibo_id)
+            # Update state store
+            if incremental and max_weibo_id:
+                self.state_store.set_state(__name__, "{}.since_id".format(query), max_weibo_id)
 
     def _create_weiboarc(self):
         self.weiboarc = Weiboarc(self.message["credentials"]["api_key"],
