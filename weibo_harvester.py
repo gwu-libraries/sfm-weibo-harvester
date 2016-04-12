@@ -42,14 +42,14 @@ class WeiboHarvester(BaseHarvester):
         seed_lists = self.message.get("seeds", [])
         if len(seed_lists):
             query = seed_lists[0].get("token")
-            since_id = self.state_store.get_state(__name__, "{}.since_id".format(query)) if incremental else None
+            since_id = self.state_store.get_state(__name__, u"{}.since_id".format(query)) if incremental else None
             max_weibo_id = self._process_weibos(self.weiboarc.search_friendships(since_id=since_id))
             log.debug("Searching since %s returned %s weibo.",
                       since_id, self.harvest_result.summary.get("weibo"))
 
             # Update state store
             if incremental and max_weibo_id:
-                self.state_store.set_state(__name__, "{}.since_id".format(query), max_weibo_id)
+                self.state_store.set_state(__name__, u"{}.since_id".format(query), max_weibo_id)
 
     def _create_weiboarc(self):
         self.weiboarc = Weiboarc(self.message["credentials"]["api_key"],

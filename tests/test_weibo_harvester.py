@@ -1,3 +1,7 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+from __future__ import absolute_import
 import tests
 import vcr as base_vcr
 from tests.weibos import weibo1,weibo2
@@ -34,7 +38,7 @@ class TestWeiboHarvesterVCR(tests.TestCase):
             "type": "weibo_timeline",
             "seeds": [
                 {
-                    "token": "weibo"
+                    "token": u"微博weibo"
                 },
                 {
                     "token": "weibo2"
@@ -64,7 +68,8 @@ class TestWeiboHarvesterVCR(tests.TestCase):
     @vcr.use_cassette(filter_query_parameters=['access_token'])
     def test_incremental_search_vcr(self):
         self.harvester.message["options"]["incremental"] = True
-        self.harvester.state_store.set_state("weibo_harvester", "weibo.since_id", 3935747172100551)
+        seed_id_token = self.harvester.message["seeds"][0]["token"]
+        self.harvester.state_store.set_state("weibo_harvester", u"{}.since_id".format(seed_id_token), 3935747172100551)
         self.harvester.harvest_seeds()
 
         # Check harvest result
@@ -72,7 +77,8 @@ class TestWeiboHarvesterVCR(tests.TestCase):
         # for check the number of get
         self.assertEqual(self.harvester.harvest_result.summary["weibo"], 5)
         # check the state
-        self.assertEqual(3935776104305071, self.harvester.state_store.get_state("weibo_harvester", "weibo.since_id"))
+        self.assertEqual(3935776104305071, self.harvester.state_store.get_state("weibo_harvester",
+                                                                                u"{}.since_id".format(seed_id_token)))
 
 
 class TestWeiboHarvester(tests.TestCase):
