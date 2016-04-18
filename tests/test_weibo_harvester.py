@@ -1,3 +1,7 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+from __future__ import absolute_import
 import tests
 import vcr as base_vcr
 from tests.weibos import weibo1,weibo2
@@ -32,6 +36,14 @@ class TestWeiboHarvesterVCR(tests.TestCase):
         self.harvester.message = {
             "id": "test:2",
             "type": "weibo_timeline",
+            "seeds": [
+                {
+                    "token": u"微博weibo"
+                },
+                {
+                    "token": "weibo2"
+                }
+            ],
             "credentials": {
                 "api_key": tests.WEIBO_API_KEY,
                 "api_secret": tests.WEIBO_API_SECRET,
@@ -56,7 +68,8 @@ class TestWeiboHarvesterVCR(tests.TestCase):
     @vcr.use_cassette(filter_query_parameters=['access_token'])
     def test_incremental_search_vcr(self):
         self.harvester.message["options"]["incremental"] = True
-        self.harvester.state_store.set_state("weibo_harvester", "weibo.since_id", 3935747172100551)
+        seed_id_token = self.harvester.message["seeds"][0]["token"]
+        self.harvester.state_store.set_state("weibo_harvester", u"{}.since_id".format(seed_id_token), 3935747172100551)
         self.harvester.harvest_seeds()
 
         # Check harvest result
@@ -64,7 +77,8 @@ class TestWeiboHarvesterVCR(tests.TestCase):
         # for check the number of get
         self.assertEqual(self.harvester.harvest_result.summary["weibo"], 5)
         # check the state
-        self.assertEqual(3935776104305071, self.harvester.state_store.get_state("weibo_harvester", "weibo.since_id"))
+        self.assertEqual(3935776104305071, self.harvester.state_store.get_state("weibo_harvester",
+                                                                                u"{}.since_id".format(seed_id_token)))
 
 
 class TestWeiboHarvester(tests.TestCase):
@@ -77,6 +91,14 @@ class TestWeiboHarvester(tests.TestCase):
         self.harvester.message = {
             "id": "test:1",
             "type": "weibo_timeline",
+            "seeds": [
+                {
+                    "token": "weibo"
+                },
+                {
+                    "token": "weibo2"
+                }
+            ],
             "credentials": {
                 "api_key": tests.WEIBO_API_KEY,
                 "api_secret": tests.WEIBO_API_SECRET,
@@ -169,6 +191,14 @@ class TestWeiboHarvesterIntegration(tests.TestCase):
         harvest_msg = {
             "id": "test:3",
             "type": "weibo_timeline",
+            "seeds": [
+                {
+                    "token": "weibo"
+                },
+                {
+                    "token": "weibo2"
+                }
+            ],
             "credentials": {
                 "api_key": tests.WEIBO_API_KEY,
                 "api_secret": tests.WEIBO_API_SECRET,
@@ -208,6 +238,9 @@ class TestWeiboHarvesterIntegration(tests.TestCase):
             bound_web_harvest_queue = self.web_harvest_queue(connection)
             message_obj = bound_web_harvest_queue.get(no_ack=True)
             self.assertIsNotNone(message_obj, "No web harvest message.")
+            web_harvest_msg = message_obj.payload
+            # Some seeds
+            self.assertTrue(len(web_harvest_msg["seeds"]))
 
             # Warc created message.
             bound_warc_created_queue = self.warc_created_queue(connection)
