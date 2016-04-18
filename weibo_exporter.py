@@ -4,28 +4,32 @@
 from sfmutils.exporter import ExportResult, BaseExporter, BaseTable
 from weibo_warc_iter import WeiboWarcIter
 import logging
+import re
 from dateutil.parser import parse as date_parse
-
 
 log = logging.getLogger(__name__)
 
 QUEUE = "weibo_exporter"
-TIMELINE_ROUTING_KEY = "export.start.weibo.weibo_timeline"
+TIME_LINE_ROUTING_KEY = "export.start.weibo.weibo_timeline"
+RE_LINKS = re.compile(r'(http://t.cn/[a-zA-z0-9]+)')
 
 
 class WeiboStatusTable(BaseTable):
     """
     Assume rows status for weibo
     """
+
     def __init__(self, warc_paths, dedupe, item_date_start, item_date_end, seed_uids):
         BaseTable.__init__(self, warc_paths, dedupe, item_date_start, item_date_end, seed_uids, WeiboWarcIter)
 
     def _header_row(self):
-        return ('created_at', 'weibo_id',
-                'screen_name', 'followers_count', 'friends_count',
-                'retweet_count',
-                'weibo_url', 'text',
-                'url1', 'url2')
+        return ('created_at', 'weibo_id', 'screen_name',
+                'followers_count', 'friends_count', 'reposts_count',
+                'in_reply_to_screen_name',
+                'weibo_url',
+                'text',
+                'url1',
+                'url2')
 
     def _row(self, item):
         row = [date_parse(item["created_at"]),
@@ -34,12 +38,18 @@ class WeiboStatusTable(BaseTable):
                item['user']['followers_count'],
                item['user']['friends_count'],
                item['reposts_count'],
-               'http://m.weibo.cn/{}/{}'.format(item["user"]["id_str"], item["mid"]),
-               item['text'].replace('\n', ' ')
+               item['in_reply_to_screen_name'] or '',
+               'http://m.weibo.cn/{}/{}'.format(item["user"]["idstr"], item["mid"]),
+               item['text']
                ]
-        for url in item['pic_urls']['urls'][:2]:
-            row.extend([url['url']])
+        row.extend(self._regex_links(item['text'])[:2])
         return row
+
+    def _regex_links(self, text):
+        """
+        A list of bare urls from weibo text
+        """
+        return RE_LINKS.findall(text)
 
 
 class WeiboExporter(BaseExporter):
@@ -47,5 +57,6 @@ class WeiboExporter(BaseExporter):
         BaseExporter.__init__(self, api_base_url, WeiboWarcIter, WeiboStatusTable, mq_config=mq_config,
                               warc_base_path=warc_base_path)
 
+
 if __name__ == "__main__":
-    WeiboExporter.main(WeiboExporter, QUEUE, [TIMELINE_ROUTING_KEY])
+    WeiboExporter.main(WeiboExporter, QUEUE, [TIME_LINE_ROUTING_KEY])
