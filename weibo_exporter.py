@@ -12,7 +12,7 @@ log = logging.getLogger(__name__)
 QUEUE = "weibo_exporter"
 TIME_LINE_ROUTING_KEY = "export.start.weibo.weibo_timeline"
 RE_LINKS = re.compile(r'(http://t.cn/[a-zA-z0-9]+)')
-RE_TOPIC = re.compile(ur'#[\w\\\u4e00-\u9fff]+#')
+RE_TOPIC = re.compile(ur'#[\w\\\s\u4e00-\u9fff]+#')
 
 
 class WeiboStatusTable(BaseTable):
@@ -34,7 +34,6 @@ class WeiboStatusTable(BaseTable):
                 'url2')
 
     def _row(self, item):
-        log.debug("Topics are %s, text is %s ",self._regex_topic(item['text']),item['text'])
         row = [date_parse(item["created_at"]),
                item["mid"],
                item['user']['screen_name'],
@@ -60,7 +59,7 @@ class WeiboStatusTable(BaseTable):
 
     def _regex_topic(self, text):
         """
-        A list of bare urls from weibo text
+        A list of topic from weibo text
         """
         return RE_TOPIC.findall(text)
 

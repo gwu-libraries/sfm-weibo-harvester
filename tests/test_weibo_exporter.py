@@ -18,9 +18,9 @@ class TestWeiboStatusTable(tests.TestCase):
         self.assertEqual(679396, row[3])
         self.assertEqual(837, row[4])
         self.assertEqual(72, row[5])
-        self.assertEqual("\u5934\u6761\u65b0\u95fb, \u4eba\u6c11\u65e5\u62a5", row[6])
+        self.assertEqual("Victor Tan, \u4eba\u6c11\u65e5\u62a5", row[6])
         self.assertEqual("http://m.weibo.cn/2244733937/3928235789939265", row[8])
-        self.assertEqual("#\u5934\u6761\u65b0\u95fb##\u4eba\u6c11\u65e5\u62a5# "
+        self.assertEqual("#Victor Tan##\u4eba\u6c11\u65e5\u62a5# "
                          "\u7591\u4f3c\u90a3\u5565\u4e86\u4e00\u6b21\u3002 http://t.cn/RGzPJYq",
                          row[9])
         self.assertEqual("http://t.cn/RGzPJYq", row[10])
