@@ -1,0 +1,23 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.9.1]
+    method: GET
+    uri: http://api/api/v1/warcs/?seedset=afe49fc673ab4380909e06f43b46a990
+  response:
+    body: {string: !!python/unicode '[{"warc_id":"be7553f7d4d94ba488116f57ed3de829","path":"/sfm-data/collection/9cb10185186c434f86320e5bf22ce5d7/2016/04/25/20/3a3f522447d1482f8f8dd0018b00bd35-20160425202046193-00000-39-6f576f468fe9-8000.warc.gz","sha1":"c6f89fc09fbb336541c205dc4884592434b43816","bytes":104672,"date_created":"2016-04-25T15:20:49.261213Z"}]'}
+    headers:
+      allow: ['GET, HEAD, OPTIONS']
+      connection: [Keep-Alive]
+      content-type: [application/json]
+      date: ['Mon, 25 Apr 2016 20:26:30 GMT']
+      keep-alive: ['timeout=5, max=100']
+      server: [Apache/2.4.7 (Ubuntu)]
+      vary: ['Accept,Cookie']
+      x-frame-options: [SAMEORIGIN]
+    status: {code: 200, message: OK}
+version: 1
