@@ -22,7 +22,7 @@ class WeiboWarcIter(BaseWarcIter):
         return ["weibo_status"]
 
     def _select_item(self, item):
-        if not self.limit_user_ids or item.get("user", {}).get("id_str") in self.limit_user_ids:
+        if not self.limit_user_ids or item.get("user", {}).get("idstr") in self.limit_user_ids:
             return True
         return False
 

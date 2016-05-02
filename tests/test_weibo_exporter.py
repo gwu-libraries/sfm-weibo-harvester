@@ -68,6 +68,32 @@ class TestWeiboExporterVcr(tests.TestCase):
             lines = f.readlines()
         self.assertEqual(158, len(lines))
 
+    @vcr.use_cassette()
+    def test_export_seeds_uid(self):
+        export_message = {
+            "id": "test2",
+            "type": "weibo_timeline",
+            "seeds": [
+                {
+                    "id": "5d8ea69b354444c699df6e984eb83825",
+                    "uid": "1642591402"
+                }
+            ],
+            "dedupe":True,
+            "format": "csv",
+            "path": self.export_path
+        }
+
+        self.exporter.message = export_message
+        self.exporter.on_message()
+
+        self.assertTrue(self.exporter.export_result.success)
+        csv_filepath = os.path.join(self.export_path, "test2.csv")
+        self.assertTrue(os.path.exists(csv_filepath))
+        with open(csv_filepath, "r") as f:
+            lines = f.readlines()
+        self.assertEqual(18, len(lines))
+
 
 class TestWeiboStatusTableVcr(tests.TestCase):
     def setUp(self):
