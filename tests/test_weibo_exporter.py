@@ -70,6 +70,13 @@ class TestWeiboExporterVcr(tests.TestCase):
 
     @vcr.use_cassette()
     def test_export_seeds_uid(self):
+        """
+        The uid locates in the seeds page.
+        The exporter can filter the post status data relying on the seeds' uids.
+        However, the weibo harvester is seedless. It might a problem with exporting the status using uids.
+        Function tests are based on the harvest seeds.
+        :return:
+        """
         export_message = {
             "id": "test2",
             "type": "weibo_timeline",
