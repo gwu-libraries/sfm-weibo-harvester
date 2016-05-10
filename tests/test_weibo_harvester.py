@@ -37,14 +37,6 @@ class TestWeiboHarvesterVCR(tests.TestCase):
             "id": "test:2",
             "type": "weibo_timeline",
             "path": "/collections/test_collection",
-            "seeds": [
-                {
-                    "token": u"微博weibo"
-                },
-                {
-                    "token": "weibo2"
-                }
-            ],
             "credentials": {
                 "api_key": tests.WEIBO_API_KEY,
                 "api_secret": tests.WEIBO_API_SECRET,
@@ -68,8 +60,8 @@ class TestWeiboHarvesterVCR(tests.TestCase):
     @vcr.use_cassette(filter_query_parameters=['access_token'])
     def test_incremental_search_vcr(self):
         self.harvester.message["options"]["incremental"] = True
-        seed_id_token = self.harvester.message["seeds"][0]["token"]
-        self.harvester.state_store.set_state("weibo_harvester", u"{}.since_id".format(seed_id_token), 3935747172100551)
+        collection_id = self.harvester.message["collection"]["id"]
+        self.harvester.state_store.set_state("weibo_harvester", u"{}.since_id".format(collection_id), 3935747172100551)
         self.harvester.harvest_seeds()
 
         # Check harvest result
@@ -78,7 +70,7 @@ class TestWeiboHarvesterVCR(tests.TestCase):
         self.assertEqual(self.harvester.harvest_result.summary["weibo"], 5)
         # check the state
         self.assertEqual(3935776104305071, self.harvester.state_store.get_state("weibo_harvester",
-                                                                                u"{}.since_id".format(seed_id_token)))
+                                                                                u"{}.since_id".format(collection_id)))
 
     @vcr.use_cassette(filter_query_parameters=['access_token'])
     def test_default_harvest_options_vcr(self):
@@ -116,14 +108,6 @@ class TestWeiboHarvester(tests.TestCase):
             "id": "test:1",
             "type": "weibo_timeline",
             "path": "/collections/test_collection",
-            "seeds": [
-                {
-                    "token": "weibo"
-                },
-                {
-                    "token": "weibo2"
-                }
-            ],
             "credentials": {
                 "api_key": tests.WEIBO_API_KEY,
                 "api_secret": tests.WEIBO_API_SECRET,
@@ -169,7 +153,8 @@ class TestWeiboHarvester(tests.TestCase):
             "incremental": True
         }
 
-        self.harvester.state_store.set_state("weibo_harvester", "weibo.since_id", 3927348724716740)
+        collection_id = self.harvester.message["collection"]["id"]
+        self.harvester.state_store.set_state("weibo_harvester", u"{}.since_id".format(collection_id), 3927348724716740)
         self.harvester.harvest_seeds()
 
         self.assertDictEqual({"weibo": 1}, self.harvester.harvest_result.summary)
@@ -180,7 +165,8 @@ class TestWeiboHarvester(tests.TestCase):
         self.assertEqual([call(since_id=3927348724716740)], mock_weiboarc.search_friendships.mock_calls)
         self.assertNotEqual([call(since_id=None)], mock_weiboarc.search_friendships.mock_calls)
         # State updated
-        self.assertEqual(3928235789939265, self.harvester.state_store.get_state("weibo_harvester", "weibo.since_id"))
+        self.assertEqual(3928235789939265, self.harvester.state_store.get_state("weibo_harvester",
+                                                                                u"{}.since_id".format(collection_id)))
 
     def test_default_harvest_options(self):
         self.harvester.extract_media = False
@@ -251,14 +237,6 @@ class TestWeiboHarvesterIntegration(tests.TestCase):
             "id": "test:3",
             "type": "weibo_timeline",
             "path": self.collection_path,
-            "seeds": [
-                {
-                    "token": "weibo"
-                },
-                {
-                    "token": "weibo2"
-                }
-            ],
             "credentials": {
                 "api_key": tests.WEIBO_API_KEY,
                 "api_secret": tests.WEIBO_API_SECRET,

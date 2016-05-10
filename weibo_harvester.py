@@ -40,15 +40,14 @@ class WeiboHarvester(BaseHarvester):
         incremental = self.message.get("options", {}).get("incremental", False)
 
         """
-        Weibo won't deal anything with seeds, but it need to count the since id separately since
-        different users have different followers.
-        Ideally, the seeds will be only one in weibo collection seedsets, if users add more, ui will ignore the seeds.
-        In order keep more safe, the weibo harvester only take the first element in seeds list as a ID for since id.
+        Weibo harvester is considered as a seedless harvester, the harvester message has no seeds info.
+        In order to supporting incremental searching, it will use the collection id to record the
+        corresponding since_id.
         """
-        # Get since_id flag from first elements in seeds
-        seed_lists = self.message.get("seeds", [])
-        if len(seed_lists):
-            query = seed_lists[0].get("token")
+        # Get since_id flag from collection id
+        collections_id = self.message["collection"]["id"]
+        if len(collections_id):
+            query = collections_id
             since_id = self.state_store.get_state(__name__, u"{}.since_id".format(query)) if incremental else None
             max_weibo_id = self._process_weibos(self.weiboarc.search_friendships(since_id=since_id))
             log.debug("Searching since %s returned %s weibo.",
