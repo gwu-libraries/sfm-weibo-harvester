@@ -68,39 +68,6 @@ class TestWeiboExporterVcr(tests.TestCase):
             lines = f.readlines()
         self.assertEqual(158, len(lines))
 
-    @vcr.use_cassette()
-    def test_export_seeds_uid(self):
-        """
-        The uid locates in the seeds page.
-        The exporter can filter the post status data relying on the seeds' uids.
-        However, the weibo harvester is seedless. It might a problem with exporting the status using uids.
-        Function tests are based on the harvest seeds.
-        :return:
-        """
-        export_message = {
-            "id": "test2",
-            "type": "weibo_timeline",
-            "seeds": [
-                {
-                    "id": "5d8ea69b354444c699df6e984eb83825",
-                    "uid": "1642591402"
-                }
-            ],
-            "dedupe":True,
-            "format": "csv",
-            "path": self.export_path
-        }
-
-        self.exporter.message = export_message
-        self.exporter.on_message()
-
-        self.assertTrue(self.exporter.export_result.success)
-        csv_filepath = os.path.join(self.export_path, "test2.csv")
-        self.assertTrue(os.path.exists(csv_filepath))
-        with open(csv_filepath, "r") as f:
-            lines = f.readlines()
-        self.assertEqual(18, len(lines))
-
 
 class TestWeiboStatusTableVcr(tests.TestCase):
     def setUp(self):
