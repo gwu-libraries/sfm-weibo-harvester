@@ -10,6 +10,7 @@ sfmweiboharvester:
     volumes:
         - "..:/opt/sfm-weibo-harvester"
     environment:
+        - TZ=EST
         - WEIBO_API_KEY
         - WEIBO_API_SECRET
         - WEIBO_REDIRECT_URI

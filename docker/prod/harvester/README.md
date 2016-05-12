@@ -1,4 +1,4 @@
-# sfm-weibo-harvester master docker container
+# sfm-weibo-harvester prod docker container
 
 A docker container for running sfm-weibo-harvester as a service.
 

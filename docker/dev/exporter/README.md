@@ -1,4 +1,4 @@
-# sfm-weibo-exporter master docker container
+# sfm-weibo-exporter dev docker container
 
 A docker container for running sfm-weibo-exporter as a service.
 The harvester code must be mounted as `/opt/sfm-weibo-harvester`, the sfm-utils code as `/opt/sfm-utils` and the warcprox code as `/opt/warcprox`.
