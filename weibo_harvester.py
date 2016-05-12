@@ -18,9 +18,16 @@ class WeiboHarvester(BaseHarvester):
     def __init__(self, mq_config=None, debug=False):
         BaseHarvester.__init__(self, mq_config=mq_config, debug=debug)
         self.weiboarc = None
+        # Initial the harvest options.
+        self.extract_media = False
+        self.extract_web_resources = False
 
     def harvest_seeds(self):
         self._create_weiboarc()
+
+        # Get harvest extract options.
+        self.extract_media = self.message.get("options", {}).get("media", False)
+        self.extract_web_resources = self.message.get("options", {}).get("web_resources", False)
 
         harvest_type = self.message.get("type")
         log.debug("Harvest type is %s", harvest_type)
@@ -66,13 +73,22 @@ class WeiboHarvester(BaseHarvester):
                 with self.harvest_result_lock:
                     max_weibo_id = max(max_weibo_id, weibo['id'])
                     self.harvest_result.increment_summary("weibo")
-                    # URL-1 analyzing the url in text field and adding the short url in lists
-                    self.harvest_result.urls.extend(self._regex_links(weibo['text'].encode('utf-8')))
-                    # URL-2 adding the photo url with the large size
-                    if 'pic_urls' in weibo:
-                        self.harvest_result.urls.extend(
-                            map(lambda x: x['thumbnail_pic'].replace('thumbnail', 'large'), weibo['pic_urls']))
+                    self._process_options(weibo['retweeted_status'] if 'retweeted_status' in weibo else weibo)
+
         return max_weibo_id
+
+    def _process_options(self, weibo):
+        if self.extract_web_resources:
+            # URL-1 analyzing the url in text field and adding the short url in lists
+            self.harvest_result.urls.extend(self._regex_links(weibo['text'].encode('utf-8')))
+            # URL-2 adding the long text url
+            if 'isLongText' in weibo and weibo['isLongText']:
+                self.harvest_result.urls.append(
+                     'http://m.weibo.cn/' + weibo['user']['idstr'] + '/' + weibo['mid'])
+        if self.extract_media and 'pic_urls' in weibo:
+            # URL-3 adding the photo url with the large size
+            self.harvest_result.urls.extend(
+                map(lambda x: x['thumbnail_pic'].replace('thumbnail', 'large'), weibo['pic_urls']))
 
     def _regex_links(self, text):
         """
