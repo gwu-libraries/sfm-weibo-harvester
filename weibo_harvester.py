@@ -69,10 +69,9 @@ class WeiboHarvester(BaseHarvester):
             if not count % 100:
                 log.debug("Processed %s weibo", count)
             if "text" in weibo:
-                with self.harvest_result_lock:
-                    max_weibo_id = max(max_weibo_id, weibo['id'])
-                    self.harvest_result.increment_summary("weibo")
-                    self._process_options(weibo['retweeted_status'] if 'retweeted_status' in weibo else weibo)
+                max_weibo_id = max(max_weibo_id, weibo['id'])
+                self.harvest_result.increment_summary("weibo")
+                self._process_options(weibo['retweeted_status'] if 'retweeted_status' in weibo else weibo)
 
         return max_weibo_id
 
