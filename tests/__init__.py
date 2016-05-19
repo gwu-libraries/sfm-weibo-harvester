@@ -6,13 +6,9 @@ import socket
 try:
     from test_config import *
 except ImportError:
-    WEIBO_API_KEY = os.environ.get("WEIBO_API_KEY")
-    WEIBO_API_SECRET = os.environ.get("WEIBO_API_SECRET")
-    WEIBO_REDIRECT_URI = os.environ.get("WEIBO_REDIRECT_URI")
     WEIBO_ACCESS_TOKEN = os.environ.get("WEIBO_ACCESS_TOKEN")
 
-test_config_available = True if WEIBO_API_KEY and WEIBO_API_SECRET \
-                                and WEIBO_REDIRECT_URI and WEIBO_ACCESS_TOKEN else False
+test_config_available = True if WEIBO_ACCESS_TOKEN else False
 
 mq_port_available = True
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

@@ -38,9 +38,6 @@ class TestWeiboHarvesterVCR(tests.TestCase):
             "type": "weibo_timeline",
             "path": "/collections/test_collection",
             "credentials": {
-                "api_key": tests.WEIBO_API_KEY,
-                "api_secret": tests.WEIBO_API_SECRET,
-                "redirect_uri": tests.WEIBO_REDIRECT_URI,
                 "access_token": tests.WEIBO_ACCESS_TOKEN
             },
             "collection": {
@@ -109,9 +106,6 @@ class TestWeiboHarvester(tests.TestCase):
             "type": "weibo_timeline",
             "path": "/collections/test_collection",
             "credentials": {
-                "api_key": tests.WEIBO_API_KEY,
-                "api_secret": tests.WEIBO_API_SECRET,
-                "redirect_uri": tests.WEIBO_REDIRECT_URI,
                 "access_token": tests.WEIBO_ACCESS_TOKEN
             },
             "collection": {
@@ -133,8 +127,7 @@ class TestWeiboHarvester(tests.TestCase):
 
         self.harvester.harvest_seeds()
         self.assertDictEqual({"weibos": 2}, self.harvester.harvest_result.stats_summary())
-        mock_weiboarc_class.assert_called_once_with(tests.WEIBO_API_KEY, tests.WEIBO_API_SECRET,
-                                                    tests.WEIBO_REDIRECT_URI, tests.WEIBO_ACCESS_TOKEN)
+        mock_weiboarc_class.assert_called_once_with(tests.WEIBO_ACCESS_TOKEN)
 
         self.assertEqual([call(since_id=None)], mock_weiboarc.search_friendships.mock_calls)
         # Nothing added to state
@@ -158,8 +151,7 @@ class TestWeiboHarvester(tests.TestCase):
         self.harvester.harvest_seeds()
 
         self.assertDictEqual({"weibos": 1}, self.harvester.harvest_result.stats_summary())
-        mock_weiboarc_class.assert_called_once_with(tests.WEIBO_API_KEY, tests.WEIBO_API_SECRET,
-                                                    tests.WEIBO_REDIRECT_URI, tests.WEIBO_ACCESS_TOKEN)
+        mock_weiboarc_class.assert_called_once_with(tests.WEIBO_ACCESS_TOKEN)
 
         # since_id must be in the mock calls
         self.assertEqual([call(since_id=3927348724716740)], mock_weiboarc.search_friendships.mock_calls)
@@ -238,9 +230,6 @@ class TestWeiboHarvesterIntegration(tests.TestCase):
             "type": "weibo_timeline",
             "path": self.collection_path,
             "credentials": {
-                "api_key": tests.WEIBO_API_KEY,
-                "api_secret": tests.WEIBO_API_SECRET,
-                "redirect_uri": tests.WEIBO_REDIRECT_URI,
                 "access_token": tests.WEIBO_ACCESS_TOKEN
             },
             "collection": {
