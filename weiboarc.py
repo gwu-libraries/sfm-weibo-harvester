@@ -260,13 +260,13 @@ class Weiboarc(object):
 
         if rl:
             if rl['remaining_ip_hits'] > 1 and rl['remaining_user_hits'] > 1:
-                return 1
-            return rl['reset_time_in_seconds'] + 1
+                return 60
+            return rl['reset_time_in_seconds'] + 10
 
         now = datetime.now()
         reset = now + timedelta(seconds=3600 - now.minute * 60 - now.second)
         reset_ts = time.mktime(datetime.timetuple(reset))
-        return reset_ts - time.time() + 10
+        return reset_ts - time.time() + 60
 
     def _connect(self):
         log.info("creating client session...")
@@ -331,7 +331,7 @@ class Client(object):
         res = self.session.get(url, params=kwargs)
 
         # other error code with server will be deal in low level app
-        # 403 for invalid access token
+        # 403 for invalid access token and rate limit
         if res.status_code in [200, 403]:
             self._assert_error(res.json())
         return res
