@@ -251,7 +251,7 @@ class Weiboarc(object):
             # if rate limit reach
             if r.status_code == 429:
                 seconds = self.wait_time()
-                logging.warn("Rate limit 429 from Weibo API, Sleep %d to try...",seconds)
+                logging.warn("Rate limit 429 from Weibo API, Sleep %d to try...", seconds)
                 time.sleep(seconds)
                 r = self.get(*args, **kwargs)
             return r
@@ -367,7 +367,8 @@ class Client(object):
         res = self.session.get(url, params=kwargs)
 
         # other error code with server will be deal in low level app
-        if res.status_code == 200:
+        # 403 for invalid access token
+        if res.status_code in [200, 403]:
             self._assert_error(res.json())
         return res
 
