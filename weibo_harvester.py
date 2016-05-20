@@ -51,7 +51,7 @@ class WeiboHarvester(BaseHarvester):
             since_id = self.state_store.get_state(__name__, u"{}.since_id".format(query)) if incremental else None
             max_weibo_id = self._process_weibos(self.weiboarc.search_friendships(since_id=since_id))
             log.debug("Searching since %s returned %s weibo.",
-                      since_id, self.harvest_result.summary.get("weibo"))
+                      since_id, self.harvest_result.stats_summary().get("weibo"))
 
             # Update state store
             if incremental and max_weibo_id:
@@ -70,7 +70,7 @@ class WeiboHarvester(BaseHarvester):
                 log.debug("Processed %s weibo", count)
             if "text" in weibo:
                 max_weibo_id = max(max_weibo_id, weibo['id'])
-                self.harvest_result.increment_summary("weibo")
+                self.harvest_result.increment_stats("weibos")
                 self._process_options(weibo['retweeted_status'] if 'retweeted_status' in weibo else weibo)
 
         return max_weibo_id

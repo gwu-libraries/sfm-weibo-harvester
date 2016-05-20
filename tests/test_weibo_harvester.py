@@ -15,7 +15,7 @@ import shutil
 import tempfile
 import time
 import os
-from datetime import datetime
+from datetime import datetime, date
 from weibo_harvester import WeiboHarvester
 from weiboarc import Weiboarc
 
@@ -53,7 +53,7 @@ class TestWeiboHarvesterVCR(tests.TestCase):
     def test_search_vcr(self):
         self.harvester.harvest_seeds()
         # check the total number, for new users don't how to check
-        self.assertEqual(self.harvester.harvest_result.summary["weibo"], 181)
+        self.assertEqual(self.harvester.harvest_result.stats_summary()["weibos"], 181)
         # check the harvester status
         self.assertTrue(self.harvester.harvest_result.success)
 
@@ -67,7 +67,7 @@ class TestWeiboHarvesterVCR(tests.TestCase):
         # Check harvest result
         self.assertTrue(self.harvester.harvest_result.success)
         # for check the number of get
-        self.assertEqual(self.harvester.harvest_result.summary["weibo"], 5)
+        self.assertEqual(self.harvester.harvest_result.stats_summary()["weibos"], 5)
         # check the state
         self.assertEqual(3935776104305071, self.harvester.state_store.get_state("weibo_harvester",
                                                                                 u"{}.since_id".format(collection_id)))
@@ -132,7 +132,7 @@ class TestWeiboHarvester(tests.TestCase):
         mock_weiboarc_class.side_effect = [mock_weiboarc]
 
         self.harvester.harvest_seeds()
-        self.assertDictEqual({"weibo": 2}, self.harvester.harvest_result.summary)
+        self.assertDictEqual({"weibos": 2}, self.harvester.harvest_result.stats_summary())
         mock_weiboarc_class.assert_called_once_with(tests.WEIBO_API_KEY, tests.WEIBO_API_SECRET,
                                                     tests.WEIBO_REDIRECT_URI, tests.WEIBO_ACCESS_TOKEN)
 
@@ -157,7 +157,7 @@ class TestWeiboHarvester(tests.TestCase):
         self.harvester.state_store.set_state("weibo_harvester", u"{}.since_id".format(collection_id), 3927348724716740)
         self.harvester.harvest_seeds()
 
-        self.assertDictEqual({"weibo": 1}, self.harvester.harvest_result.summary)
+        self.assertDictEqual({"weibos": 1}, self.harvester.harvest_result.stats_summary())
         mock_weiboarc_class.assert_called_once_with(tests.WEIBO_API_KEY, tests.WEIBO_API_SECRET,
                                                     tests.WEIBO_REDIRECT_URI, tests.WEIBO_ACCESS_TOKEN)
 
@@ -272,7 +272,7 @@ class TestWeiboHarvesterIntegration(tests.TestCase):
             # Success
             self.assertEqual("completed success", result_msg["status"])
             # Some weibo posts
-            self.assertTrue(result_msg["summary"]["weibo"])
+            self.assertTrue(result_msg["stats"][date.today().isoformat()]["weibos"])
 
             # Web harvest message.
             bound_web_harvest_queue = self.web_harvest_queue(connection)
