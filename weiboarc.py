@@ -39,12 +39,6 @@ def main():
                         help="smallest id to search for")
     parser.add_argument("--log", dest="log",
                         default="weiboarc.log", help="log file")
-    parser.add_argument("--api_key",
-                        default=None, help="Weibo API key")
-    parser.add_argument("--api_secret",
-                        default=None, help="Weibo API secret")
-    parser.add_argument("--redirect_uri",
-                        default=None, help="Weibo API redirect uri")
     parser.add_argument("--access_token",
                         default=None, help="Weibo API access_token")
     parser.add_argument('-c', '--config',
@@ -64,34 +58,18 @@ def main():
     )
 
     # get the api key
-    api_key = args.api_key or os.environ.get('API_KEY')
-    api_secret = args.api_secret or os.environ.get('API_SECRET')
     access_token = args.access_token or os.environ.get("ACCESS_TOKEN")
-    redirect_uri = args.redirect_uri or os.environ.get('REDIRECT_URI')
-
-    if not (api_key and api_secret and
-            access_token and redirect_uri):
+    if not access_token:
         credentials = load_config(args.config, args.profile)
         if credentials:
-            api_key = credentials['api_key']
-            api_secret = credentials['api_secret']
-            redirect_uri = credentials['redirect_uri']
             access_token = credentials['access_token']
         else:
             print("Please enter weibo authentication credentials")
-            api_key = get_input('api_key: ')
-            api_secret = get_input('api_secret: ')
-            redirect_uri = get_input('redirect_uri: ')
             access_token = get_input('access_token: ')
 
-            save_keys(args.profile, api_key, api_secret,
-                      redirect_uri, access_token)
+            save_keys(args.profile, access_token)
 
-    weiboarc = Weiboarc(api_key=api_key,
-                        api_secret=api_secret,
-                        redirect_uri=redirect_uri,
-                        access_token=access_token)
-
+    weiboarc = Weiboarc(access_token=access_token)
     weibos = weiboarc.search_friendships(since_id=args.since_id, max_id=args.max_id)
 
     for weibo in weibos:
@@ -104,28 +82,20 @@ def main():
             log.warn(json.dumps(weibo))
 
 
-def save_config(filename, profile,
-                api_key, api_secret,
-                redirect_uri, access_token):
+def save_config(filename, profile, access_token):
     config = configparser.ConfigParser()
     config.add_section(profile)
-    config.set(profile, 'api_key', api_key)
-    config.set(profile, 'api_secret', api_secret)
-    config.set(profile, 'redirect_uri', redirect_uri)
     config.set(profile, 'access_token', access_token)
     with open(filename, 'w') as config_file:
         config.write(config_file)
 
 
-def save_keys(profile, api_key, api_secret,
-              redirect_uri, access_token):
+def save_keys(profile, access_token):
     """
     Save keys to ~/.weibowarc
     """
     filename = default_config_filename()
-    save_config(filename, profile,
-                api_key, api_secret,
-                redirect_uri, access_token)
+    save_config(filename, profile, access_token)
     print("Keys saved to", filename)
 
 
@@ -135,7 +105,7 @@ def load_config(filename, profile):
     config = configparser.ConfigParser()
     config.read(filename)
     data = {}
-    for key in ['access_token', 'redirect_uri', 'api_key', 'api_secret']:
+    for key in ['access_token']:
         try:
             data[key] = config.get(profile, key)
         except configparser.NoSectionError:
@@ -194,15 +164,12 @@ class Weiboarc(object):
     get data from the friendships API.
     """
 
-    def __init__(self, api_key, api_secret, redirect_uri, access_token):
+    def __init__(self, access_token):
         """
         Instantiate a Weiboarc instance. Make sure your  variables
         are set.
         """
 
-        self.api_key = api_key
-        self.api_secret = api_secret
-        self.redirect_uri = redirect_uri
         self.access_token = access_token
         self._connect()
 
@@ -302,12 +269,9 @@ class Weiboarc(object):
         return reset_ts - time.time() + 10
 
     def _connect(self):
-        log.info("creating client session with api_key=%s", self.api_key)
+        log.info("creating client session...")
         try:
-            self.client = Client(api_key=self.api_key,
-                                 api_secret=self.api_secret,
-                                 redirect_uri=self.redirect_uri,
-                                 access_token=self.access_token)
+            self.client = Client(access_token=self.access_token)
         except Exception, e:
             log.error("creating client session error,%s", e)
             raise e
@@ -332,7 +296,7 @@ class Client(object):
     Refer from https://github.com/lxyu/weibo/blob/master/weibo.py
     Since we need deal withe the http response error code
     """
-    def __init__(self, api_key, api_secret, redirect_uri, access_token):
+    def __init__(self, access_token, api_key=None, api_secret=None, redirect_uri=None):
         # const define
         self.site = 'https://api.weibo.com/'
         self.authorization_url = self.site + 'oauth2/authorize'

@@ -58,10 +58,7 @@ class WeiboHarvester(BaseHarvester):
                 self.state_store.set_state(__name__, u"{}.since_id".format(query), max_weibo_id)
 
     def _create_weiboarc(self):
-        self.weiboarc = Weiboarc(self.message["credentials"]["api_key"],
-                                 self.message["credentials"]["api_secret"],
-                                 self.message["credentials"]["redirect_uri"],
-                                 self.message["credentials"]["access_token"])
+        self.weiboarc = Weiboarc(self.message["credentials"]["access_token"])
 
     def _process_weibos(self, weibos):
         max_weibo_id = None

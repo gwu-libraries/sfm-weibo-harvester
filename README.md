@@ -35,11 +35,8 @@ python -m unittest discover
 ## Integration tests in docker containers
 * Install [Docker](https://docs.docker.com/installation/) and [Docker-Compose](https://docs.docker.com/compose/install/)
 
-* Provide  the `WEIBO_API_KEY`, `WEIBO_API_SECRET`, `WEIBO_REDIRECT_URI`, `WEIBO_ACCESS_TOKEN` to the tests. This can be done either by putting them in a file named test_config.py or in environment variables (`WEIBO_API_KEY`, `WEIBO_API_SECRET`, `WEIBO_REDIRECT_URI`, `WEIBO_ACCESS_TOKEN`). An example test_config.py looks like:
+* Provide the `WEIBO_ACCESS_TOKEN` to the tests. This can be done either by putting them in a file named test_config.py or in environment variables (`WEIBO_ACCESS_TOKEN`). An example test_config.py looks like:
 ```python
-WEIBO_API_KEY = "123456789"
-WEIBO_API_SECRET = "34567890123312"
-WEIBO_REDIRECT_URI = "https://www.google.com"
 WEIBO_ACCESS_TOKEN = "2.kQCxKsdpYiFYDc41039481c0fi"
 ```
 
@@ -89,7 +86,4 @@ The necessary information to construct a harvest start message for the weibo har
 
 Required parameters:
 
-* api_key
-* api_secret
-* redirect_uri
 * access_token

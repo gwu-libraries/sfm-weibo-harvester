@@ -12,8 +12,5 @@ sfmweiboharvester:
         - "..:/opt/sfm-weibo-harvester"
     environment:
         - TZ=EST
-        - WEIBO_API_KEY
-        - WEIBO_API_SECRET
-        - WEIBO_REDIRECT_URI
         - WEIBO_ACCESS_TOKEN
     command: bash -c "pip install -r  requirements/master.txt --upgrade && appdeps.py --port-wait mq:5672 && python weibo_harvester.py --debug=True service mq sfm_user password"
