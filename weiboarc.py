@@ -332,7 +332,8 @@ class Client(object):
 
         # other error code with server will be deal in low level app
         # 403 for invalid access token and rate limit
-        if res.status_code in [200, 403]:
+        # 400 for information of expire token
+        if res.status_code in [200, 400, 403]:
             self._assert_error(res.json())
         return res
 
