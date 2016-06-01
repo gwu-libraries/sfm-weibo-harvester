@@ -36,12 +36,12 @@ class TestWeiboHarvesterVCR(tests.TestCase):
         self.harvester.message = {
             "id": "test:2",
             "type": "weibo_timeline",
-            "path": "/collections/test_collection",
+            "path": "/collections/test_collection_set",
             "credentials": {
                 "access_token": tests.WEIBO_ACCESS_TOKEN
             },
-            "collection": {
-                "id": "test_collection"
+            "collection_set": {
+                "id": "test_collection_set"
             },
             "options": {}
         }
@@ -57,8 +57,8 @@ class TestWeiboHarvesterVCR(tests.TestCase):
     @vcr.use_cassette(filter_query_parameters=['access_token'])
     def test_incremental_search_vcr(self):
         self.harvester.message["options"]["incremental"] = True
-        collection_id = self.harvester.message["collection"]["id"]
-        self.harvester.state_store.set_state("weibo_harvester", u"{}.since_id".format(collection_id), 3935747172100551)
+        collection_set_id = self.harvester.message["collection_set"]["id"]
+        self.harvester.state_store.set_state("weibo_harvester", u"{}.since_id".format(collection_set_id), 3935747172100551)
         self.harvester.harvest_seeds()
 
         # Check harvest result
@@ -67,7 +67,8 @@ class TestWeiboHarvesterVCR(tests.TestCase):
         self.assertEqual(self.harvester.harvest_result.stats_summary()["weibos"], 5)
         # check the state
         self.assertEqual(3935776104305071, self.harvester.state_store.get_state("weibo_harvester",
-                                                                                u"{}.since_id".format(collection_id)))
+                                                                                u"{}.since_id".format(
+                                                                                    collection_set_id)))
 
     @vcr.use_cassette(filter_query_parameters=['access_token'])
     def test_default_harvest_options_vcr(self):
@@ -104,12 +105,12 @@ class TestWeiboHarvester(tests.TestCase):
         self.harvester.message = {
             "id": "test:1",
             "type": "weibo_timeline",
-            "path": "/collections/test_collection",
+            "path": "/collections/test_collection_set",
             "credentials": {
                 "access_token": tests.WEIBO_ACCESS_TOKEN
             },
-            "collection": {
-                "id": "test_collection"
+            "collection_set": {
+                "id": "test_collection_set"
             },
             "options": {
                 "web_resources": True,
@@ -146,8 +147,8 @@ class TestWeiboHarvester(tests.TestCase):
             "incremental": True
         }
 
-        collection_id = self.harvester.message["collection"]["id"]
-        self.harvester.state_store.set_state("weibo_harvester", u"{}.since_id".format(collection_id), 3927348724716740)
+        collection_set_id = self.harvester.message["collection_set"]["id"]
+        self.harvester.state_store.set_state("weibo_harvester", u"{}.since_id".format(collection_set_id), 3927348724716740)
         self.harvester.harvest_seeds()
 
         self.assertDictEqual({"weibos": 1}, self.harvester.harvest_result.stats_summary())
@@ -158,7 +159,8 @@ class TestWeiboHarvester(tests.TestCase):
         self.assertNotEqual([call(since_id=None)], mock_weiboarc.search_friendships.mock_calls)
         # State updated
         self.assertEqual(3928235789939265, self.harvester.state_store.get_state("weibo_harvester",
-                                                                                u"{}.since_id".format(collection_id)))
+                                                                                u"{}.since_id".format(
+                                                                                    collection_set_id)))
 
     def test_default_harvest_options(self):
         self.harvester.extract_media = False
@@ -218,22 +220,21 @@ class TestWeiboHarvesterIntegration(tests.TestCase):
             weibo_harvester_queue(connection).declare()
             weibo_harvester_queue(connection).purge()
 
-        self.collection_path = tempfile.mkdtemp()
+        self.path = tempfile.mkdtemp()
 
     def tearDown(self):
-        # print self.collection_path
-        shutil.rmtree(self.collection_path, ignore_errors=True)
+        shutil.rmtree(self.path, ignore_errors=True)
 
     def test_search(self):
         harvest_msg = {
             "id": "test:3",
             "type": "weibo_timeline",
-            "path": self.collection_path,
+            "path": self.path,
             "credentials": {
                 "access_token": tests.WEIBO_ACCESS_TOKEN
             },
-            "collection": {
-                "id": "test_collection"
+            "collection_set": {
+                "id": "test_collection_set"
             },
             "options": {
                 "web_resources": True,

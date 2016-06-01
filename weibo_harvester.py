@@ -41,13 +41,13 @@ class WeiboHarvester(BaseHarvester):
 
         """
         Weibo harvester is considered as a seedless harvester, the harvester message has no seeds info.
-        In order to supporting incremental searching, it will use the collection id to record the
+        In order to supporting incremental searching, it will use the collection set id to record the
         corresponding since_id.
         """
-        # Get since_id flag from collection id
-        collections_id = self.message["collection"]["id"]
-        if len(collections_id):
-            query = collections_id
+        # Get since_id flag from collection set id
+        collection_set_id = self.message["collection_set"]["id"]
+        if len(collection_set_id):
+            query = collection_set_id
             since_id = self.state_store.get_state(__name__, u"{}.since_id".format(query)) if incremental else None
             max_weibo_id = self._process_weibos(self.weiboarc.search_friendships(since_id=since_id))
             log.debug("Searching since %s returned %s weibo.",
