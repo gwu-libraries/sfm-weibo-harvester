@@ -47,11 +47,11 @@ class TestWeiboExporterVcr(tests.TestCase):
             shutil.rmtree(self.export_path)
 
     @vcr.use_cassette()
-    def test_export_seedset(self):
+    def test_export_collection(self):
         export_message = {
             "id": "test1",
             "type": "weibo_timeline",
-            "seedset": {
+            "collection": {
                 "id": "afe49fc673ab4380909e06f43b46a990"
             },
             "format": "csv",
