@@ -1,7 +1,7 @@
 sfmrabbit:
     image: rabbitmq@sha256:397382d2b222f3a298a6c74e93f348fb16f9a7fde2c02ba14122624d852daae3
     environment:
-        - TZ=EST
+        - TZ=America/New_York
         - RABBITMQ_DEFAULT_USER=sfm_user
         - RABBITMQ_DEFAULT_PASS=password
 sfmweiboharvester:
@@ -11,6 +11,6 @@ sfmweiboharvester:
     volumes:
         - "..:/opt/sfm-weibo-harvester"
     environment:
-        - TZ=EST
+        - TZ=America/New_York
         - WEIBO_ACCESS_TOKEN
     command: bash -c "pip install -r  requirements/master.txt --upgrade && appdeps.py --port-wait mq:5672 && python weibo_harvester.py --debug=True service mq sfm_user password"
