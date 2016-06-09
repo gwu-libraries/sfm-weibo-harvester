@@ -89,6 +89,7 @@ class TestWeiboHarvesterVCR(tests.TestCase):
     def test_harvest_options_media_vcr(self):
         self.harvester.message["options"]["web_resources"] = False
         self.harvester.message["options"]["media"] = True
+        self.harvester.message["options"]["sizes"] = ["Large"]
         self.harvester.harvest_seeds()
 
         # Testing URL3 photos URLs
@@ -114,7 +115,7 @@ class TestWeiboHarvester(tests.TestCase):
             },
             "options": {
                 "web_resources": True,
-                "media": True
+                "sizes": ["Large"]
             }
         }
 
@@ -185,12 +186,17 @@ class TestWeiboHarvester(tests.TestCase):
     def test_harvest_options_media(self):
         self.harvester.extract_media = True
         self.harvester.extract_web_resources = False
+        self.harvester.extract_images_sizes = ["Large", "Medium", "Thumbnail"]
 
         self.harvester._process_weibos([weibo3, weibo4, weibo5])
         # Testing URL3 photos URLs
         self.assertSetEqual({
             'http://ww2.sinaimg.cn/large/6b23a52bgw1f3pjhhyofnj208p06c3yq.jpg',
-            'http://ww4.sinaimg.cn/large/60718250jw1f3qtzyhai3j20de0vin32.jpg'
+            'http://ww4.sinaimg.cn/large/60718250jw1f3qtzyhai3j20de0vin32.jpg',
+            'http://ww2.sinaimg.cn/bmiddle/6b23a52bgw1f3pjhhyofnj208p06c3yq.jpg',
+            'http://ww4.sinaimg.cn/bmiddle/60718250jw1f3qtzyhai3j20de0vin32.jpg',
+            'http://ww2.sinaimg.cn/thumbnail/6b23a52bgw1f3pjhhyofnj208p06c3yq.jpg',
+            'http://ww4.sinaimg.cn/thumbnail/60718250jw1f3qtzyhai3j20de0vin32.jpg'
         },
             self.harvester.harvest_result.urls_as_set())
 
@@ -238,7 +244,11 @@ class TestWeiboHarvesterIntegration(tests.TestCase):
             },
             "options": {
                 "web_resources": True,
-                "media": True
+                "sizes": [
+                     "Thumbnail",
+                     "Medium",
+                     "Large"
+                    ]
             }
         }
         with self._create_connection() as connection:
