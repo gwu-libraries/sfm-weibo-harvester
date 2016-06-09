@@ -79,7 +79,6 @@ class TestWeiboHarvesterVCR(tests.TestCase):
     @vcr.use_cassette(filter_query_parameters=['access_token'])
     def test_harvest_options_web_vcr(self):
         self.harvester.message["options"]["web_resources"] = True
-        self.harvester.message["options"]["media"] = False
         self.harvester.harvest_seeds()
 
         # Testing URL1&URL2
@@ -88,7 +87,6 @@ class TestWeiboHarvesterVCR(tests.TestCase):
     @vcr.use_cassette(filter_query_parameters=['access_token'])
     def test_harvest_options_media_vcr(self):
         self.harvester.message["options"]["web_resources"] = False
-        self.harvester.message["options"]["media"] = True
         self.harvester.message["options"]["sizes"] = ["Large"]
         self.harvester.harvest_seeds()
 
@@ -164,17 +162,16 @@ class TestWeiboHarvester(tests.TestCase):
                                                                                     collection_set_id)))
 
     def test_default_harvest_options(self):
-        self.harvester.extract_media = False
         self.harvester.extract_web_resources = False
+        self.harvester.extract_images_sizes = []
 
         self.harvester._process_weibos([weibo3, weibo4, weibo5])
         # The default will not sending web harvest
         self.assertSetEqual(set(), self.harvester.harvest_result.urls_as_set())
 
     def test_harvest_options_web(self):
-        self.harvester.extract_media = False
         self.harvester.extract_web_resources = True
-
+        self.harvester.extract_images_sizes = []
         self.harvester._process_weibos([weibo3, weibo4, weibo5])
         # Testing URL1&URL2
         self.assertSetEqual({
@@ -184,7 +181,6 @@ class TestWeiboHarvester(tests.TestCase):
             self.harvester.harvest_result.urls_as_set())
 
     def test_harvest_options_media(self):
-        self.harvester.extract_media = True
         self.harvester.extract_web_resources = False
         self.harvester.extract_images_sizes = ["Large", "Medium", "Thumbnail"]
 

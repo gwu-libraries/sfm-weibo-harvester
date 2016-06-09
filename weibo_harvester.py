@@ -19,7 +19,6 @@ class WeiboHarvester(BaseHarvester):
         BaseHarvester.__init__(self, mq_config=mq_config, debug=debug)
         self.weiboarc = None
         # Initial the harvest options.
-        self.extract_media = False
         self.extract_web_resources = False
         self.extract_images_sizes = []
 
@@ -27,7 +26,6 @@ class WeiboHarvester(BaseHarvester):
         self._create_weiboarc()
 
         # Get harvest extract options.
-        self.extract_media = self.message.get("options", {}).get("media", False)
         self.extract_web_resources = self.message.get("options", {}).get("web_resources", False)
         self.extract_images_sizes = self.message.get("options", {}).get("sizes", [])
 
@@ -82,7 +80,7 @@ class WeiboHarvester(BaseHarvester):
             if 'isLongText' in weibo and weibo['isLongText']:
                 self.harvest_result.urls.append(
                      'http://m.weibo.cn/' + weibo['user']['idstr'] + '/' + weibo['mid'])
-        if self.extract_media and 'pic_urls' in weibo:
+        if len(self.extract_images_sizes) != 0 and 'pic_urls' in weibo:
             # URL-3 adding the photo url with the large size
             if "Large" in self.extract_images_sizes:
                 self.harvest_result.urls.extend(
