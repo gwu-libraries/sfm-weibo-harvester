@@ -1,6 +1,7 @@
 FROM python@sha256:ad39551743b356efda7c61f46019b97d49d1aab01b97f0e6d87c9b34326f3bfe
 MAINTAINER Vict Tan <ychtan@email.gwu.edu>
 
+ARG DEBIAN_FRONTEND=noninteractive
 ENV sfm_harvester_version 1.0.0
 
 RUN apt-get update && apt-get install -y \
