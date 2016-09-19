@@ -16,8 +16,9 @@ RE_LINKS = re.compile(r'(http://t.cn/[a-zA-z0-9]+)')
 
 
 class WeiboHarvester(BaseHarvester):
-    def __init__(self, working_path, mq_config=None, debug=False, debug_warcprox=False):
-        BaseHarvester.__init__(self, working_path, mq_config=mq_config, debug=debug, debug_warcprox=debug_warcprox)
+    def __init__(self, working_path, mq_config=None, debug=False, debug_warcprox=False, tries=3):
+        BaseHarvester.__init__(self, working_path, mq_config=mq_config, debug=debug, debug_warcprox=debug_warcprox,
+                               tries=tries)
         self.weiboarc = None
         # Initial the harvest options.
         self.extract_web_resources = False
