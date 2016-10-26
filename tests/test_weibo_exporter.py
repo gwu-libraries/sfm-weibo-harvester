@@ -33,6 +33,9 @@ class TestWeiboStatusTable(tests.TestCase):
                          "\u7591\u4f3c\u90a3\u5565\u4e86\u4e00\u6b21\u3002 http://t.cn/RGzPJYq",
                          row[9])
         self.assertEqual("http://t.cn/RGzPJYq", row[10])
+        self.assertEqual("retweeted text http://t.cn/URL1Test  http://t.cn/URL2Test", row[12])
+        self.assertEqual("http://t.cn/URL1Test", row[13])
+        self.assertEqual("http://t.cn/URL2Test", row[14])
 
 
 class TestWeiboExporterVcr(tests.TestCase):
@@ -69,7 +72,7 @@ class TestWeiboExporterVcr(tests.TestCase):
         self.assertTrue(os.path.exists(csv_filepath))
         with open(csv_filepath, "r") as f:
             lines = f.readlines()
-        self.assertEqual(158, len(lines))
+        self.assertEqual(182, len(lines))
 
 
 class TestWeiboStatusTableVcr(tests.TestCase):

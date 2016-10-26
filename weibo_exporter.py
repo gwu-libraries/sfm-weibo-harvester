@@ -31,7 +31,10 @@ class WeiboStatusTable(BaseTable):
                 'weibo_url',
                 'text',
                 'url1',
-                'url2')
+                'url2',
+                'retweeted_text',
+                'retweeted_url1',
+                'retweeted_url2')
 
     def _row(self, item):
         row = [date_parse(item["created_at"]),
@@ -43,9 +46,15 @@ class WeiboStatusTable(BaseTable):
                ', '.join(topic[1:-1] for topic in self._regex_topic(item['text'])),
                item['in_reply_to_screen_name'] or '',
                'http://m.weibo.cn/{}/{}'.format(item["user"]["idstr"], item["mid"]),
-               item['text']
+               item['text'],
                ]
-        row.extend(self._regex_links(item['text'])[:2])
+        text_url = self._regex_links(item['text'])[:2]
+        row.extend(text_url + [''] * (2 - len(text_url)))
+
+        # adding two sample urls in retweeted_status text
+        if 'retweeted_status' in item:
+            row.extend([item['retweeted_status']['text']])
+            row.extend(self._regex_links(item['retweeted_status']['text'])[:2])
         return row
 
     def id_field(self):
