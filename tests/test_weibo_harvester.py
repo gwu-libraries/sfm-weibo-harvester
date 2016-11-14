@@ -45,6 +45,9 @@ class TestWeiboHarvesterVCR(tests.TestCase):
             "collection_set": {
                 "id": "test_collection_set"
             },
+            "collection": {
+                "id": "test_collection"
+            },
             "options": {}
         }
 
@@ -90,6 +93,9 @@ class TestWeiboHarvester(tests.TestCase):
             },
             "collection_set": {
                 "id": "test_collection_set"
+            },
+            "collection": {
+                "id": "test_collection"
             },
             "options": {
                 "web_resources": True,
@@ -279,6 +285,9 @@ class TestWeiboHarvesterIntegration(tests.TestCase):
             },
             "collection_set": {
                 "id": "test_collection_set"
+            },
+            "collection": {
+                "id": "test_collection"
             },
             "options": {
                 "web_resources": True,
