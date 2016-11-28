@@ -19,7 +19,7 @@ vcr = base_vcr.VCR(
 
 class TestWeiboStatusTable(tests.TestCase):
     def test_exporter_row(self):
-        table = WeiboStatusTable(None, None, None, None, None)
+        table = WeiboStatusTable(None, None, None, None, None, None)
         row = table._row(weibo2)
         self.assertIsInstance(row[0], datetime)
         self.assertEqual("3928235789939265", row[1])
@@ -61,6 +61,7 @@ class TestWeiboExporterVcr(tests.TestCase):
                 "id": "afe49fc673ab4380909e06f43b46a990"
             },
             "format": "csv",
+            "segment_size": None,
             "path": self.export_path
         }
 
@@ -68,7 +69,7 @@ class TestWeiboExporterVcr(tests.TestCase):
         self.exporter.on_message()
 
         self.assertTrue(self.exporter.result.success)
-        csv_filepath = os.path.join(self.export_path, "test1.csv")
+        csv_filepath = os.path.join(self.export_path, "test1_001.csv")
         self.assertTrue(os.path.exists(csv_filepath))
         with open(csv_filepath, "r") as f:
             lines = f.readlines()
@@ -89,16 +90,24 @@ class TestWeiboStatusTableVcr(tests.TestCase):
                                         "-8000.warc.gz"))
 
     def test_table(self):
-        table = WeiboStatusTable(self.warc_paths, False, None, None, None)
-        count = 0
-        for count, row in enumerate(table):
-            if count == 0:
-                # check the fields on the right way
-                self.assertEqual("created_at", row[0])
-                self.assertEqual("topics", row[6])
-            if count == 2:
-                # testing the second row
-                self.assertEqual("3967949742420016", row[1])
-                self.assertEqual("http://m.weibo.cn/1635386337/3967949742420016", row[8])
-                self.assertEqual(u"看到这个视频，是我联想到我们上学时学到的课文《卖炭翁》！[伤心][话筒]", row[9])
-        self.assertEqual(7, count)
+        tables = WeiboStatusTable(self.warc_paths, False, None, None, None, segment_row_size=3)
+        chunk_count = total_count = 0
+        for idx, table in enumerate(tables):
+            chunk_count += 1
+            for count, row in enumerate(table):
+                total_count += 1
+                if count == 0:
+                    # check the fields on the right way
+                    self.assertEqual("created_at", row[0])
+                    self.assertEqual("topics", row[6])
+                if idx == 0 and count == 2:
+                    # testing the second row
+                    self.assertEqual("3967949742420016", row[1])
+                    self.assertEqual("http://m.weibo.cn/1635386337/3967949742420016", row[8])
+                    self.assertEqual(u"看到这个视频，是我联想到我们上学时学到的课文《卖炭翁》！[伤心][话筒]", row[9])
+                if idx == 2 and count == 1:
+                    # testing the second row
+                    self.assertEqual("3967949008693275", row[1])
+        self.assertEqual(3, chunk_count)
+        # 1+3,1+3,1+1
+        self.assertEqual(10, total_count)
