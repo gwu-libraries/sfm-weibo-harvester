@@ -270,12 +270,14 @@ class TestWeiboHarvesterIntegration(tests.TestCase):
             weibo_harvester_queue(connection).declare()
             weibo_harvester_queue(connection).purge()
 
-        self.path = tempfile.mkdtemp()
+        self.path = None
 
     def tearDown(self):
-        shutil.rmtree(self.path, ignore_errors=True)
+        if self.path:
+            shutil.rmtree(self.path, ignore_errors=True)
 
     def test_search(self):
+        self.path = "/sfm-data/collection_set/test_collection/test_3"
         harvest_msg = {
             "id": "test:3",
             "type": "weibo_timeline",
