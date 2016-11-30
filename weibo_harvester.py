@@ -30,7 +30,7 @@ class WeiboHarvester(BaseHarvester):
 
         # Get harvest extract options.
         self.extract_web_resources = self.message.get("options", {}).get("web_resources", False)
-        self.extract_images_sizes = self.message.get("options", {}).get("sizes", [])
+        self.extract_images_sizes = self.message.get("options", {}).get("image_sizes", [])
         self.incremental = self.message.get("options", {}).get("incremental", False)
 
         harvest_type = self.message.get("type")

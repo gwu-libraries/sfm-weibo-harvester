@@ -99,7 +99,7 @@ class TestWeiboHarvester(tests.TestCase):
             },
             "options": {
                 "web_resources": True,
-                "sizes": ["Large"]
+                "image_sizes": ["Large"]
             }
         }
 
@@ -291,7 +291,7 @@ class TestWeiboHarvesterIntegration(tests.TestCase):
             },
             "options": {
                 "web_resources": True,
-                "sizes": [
+                "image_sizes": [
                     "Thumbnail",
                     "Medium",
                     "Large"
