@@ -20,8 +20,9 @@ class WeiboStatusTable(BaseTable):
     Assume rows status for weibo
     """
 
-    def __init__(self, warc_paths, dedupe, item_date_start, item_date_end, seed_uids):
-        BaseTable.__init__(self, warc_paths, dedupe, item_date_start, item_date_end, seed_uids, WeiboWarcIter)
+    def __init__(self, warc_paths, dedupe, item_date_start, item_date_end, seed_uids, segment_row_size=None):
+        BaseTable.__init__(self, warc_paths, dedupe, item_date_start, item_date_end, seed_uids, WeiboWarcIter,
+                           segment_row_size)
 
     def _header_row(self):
         return ('created_at', 'weibo_id', 'screen_name',
