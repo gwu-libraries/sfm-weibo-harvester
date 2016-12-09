@@ -6,12 +6,22 @@ services:
           - TZ=America/New_York
           - RABBITMQ_DEFAULT_USER=sfm_user
           - RABBITMQ_DEFAULT_PASS=password
+  data:
+      image: gwul/sfm-data:master
+      volumes:
+           - /sfm-data
+      environment:
+          - TZ=America/New_York
+          - SFM_UID=900
+          - SFM_GID=900
   weiboharvester:
       image: gwul/sfm-weibo-harvester:master
       links:
           - rabbit:mq
       volumes:
           - "..:/opt/sfm-weibo-harvester"
+      volumes_from:
+          - data
       environment:
           - TZ=America/New_York
           - WEIBO_ACCESS_TOKEN
@@ -20,3 +30,5 @@ services:
           - RABBITMQ_PASSWORD=password
           - DEBUG=true
           - HARVEST_TRIES=3
+          - SFM_UID=900
+          - SFM_GID=900
