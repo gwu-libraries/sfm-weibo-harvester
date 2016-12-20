@@ -14,7 +14,7 @@ setup(
              'weibo_warc_iter.py'],
     py_modules=['weibo_harvester','weiboarc','weibo_warc_iter'],
     install_requires=['sfmutils'],
-    tests_require=['mock>=1.4.0'],
+    tests_require=['mock>=1.3.0'],
     classifiers=[
         'Intended Audience :: Developers',
         'Topic :: Software Development :: Libraries :: Python Modules',
