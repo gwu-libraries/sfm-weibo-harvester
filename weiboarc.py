@@ -19,6 +19,9 @@ try:
 except ImportError:
     import ConfigParser as configparser  # Python 2
 
+# Max weibos in per page
+MAX_WEIBO_PER_PAGE = 50
+
 
 # Error code for weibo api
 # 10022   IP requests out of rate limit
@@ -33,6 +36,8 @@ def main():
     """
 
     parser = argparse.ArgumentParser("weiboarc")
+    parser.add_argument("--search", dest="search",
+                        help="search for weibo posts matching a query topic")
     parser.add_argument("--max_id", dest="max_id",
                         help="maximum weibo id to search for")
     parser.add_argument("--since_id", dest="since_id",
@@ -70,7 +75,15 @@ def main():
             save_keys(args.profile, access_token)
 
     weiboarc = Weiboarc(access_token=access_token)
-    weibos = weiboarc.search_friendships(since_id=args.since_id, max_id=args.max_id)
+    weibos = []
+    if args.search:
+        weibos = weiboarc.search_topic(
+            args.search.decode('utf-8'),
+            since_id=None if not args.since_id else int(args.since_id),
+            max_id=None if not args.max_id else int(args.max_id),
+        )
+    else:
+        weibos = weiboarc.search_friendships(since_id=args.since_id, max_id=args.max_id)
 
     for weibo in weibos:
         if u'mid' in weibo or args.warnings:
@@ -128,6 +141,7 @@ def status_error(f):
     A decorator to handle http response error from the Weibo API.
     refer: https://github.com/edsu/twarc/blob/master/twarc.py
     """
+
     def new_f(*args, **kwargs):
         errors = 0
         while True:
@@ -155,6 +169,7 @@ def status_error(f):
                 time.sleep(seconds)
             else:
                 resp.raise_for_status()
+
     return new_f
 
 
@@ -173,12 +188,64 @@ class Weiboarc(object):
         self.access_token = access_token
         self._connect()
 
+    def search_topic(self, q, since_id=None, max_id=None):
+        """
+        Return the latest 200 weibos related to a query topic
+        :param q: keyword for topic to search
+        :param since_id: it will return the weibo with id larger than the id
+        :param max_id: it will return the weibo with id smaller than the id
+        """
+        log.info(u"starting search for topic:%s.", q)
+        search_url = "search/topics"
+        params = {
+            'count': MAX_WEIBO_PER_PAGE,
+            'q': q
+        }
+        start_page = 1
+        while True:
+            params['page'] = start_page
+
+            # if access more than 200, avoid ["error_code": "21411", error": "only provide 200 results"]
+            if start_page * MAX_WEIBO_PER_PAGE > 200:
+                break
+
+            resp = self.get(search_url, **params)
+            statuses = resp.json()['statuses']
+
+            if len(statuses) == 0:
+                logging.info("reach the end of calling for weibos statues.")
+                break
+
+            start_pos, end_pos = 0, len(statuses)
+            if max_id:
+                start_pos = self._lower_bound(statuses, max_id)
+            if since_id:
+                end_pos = self._upper_bound(statuses, since_id)
+
+            # checks the result after filtering
+            if len(statuses[start_pos:end_pos]) == 0:
+                logging.info("no new weibos matching since_id %s and max_id %s", since_id, max_id)
+                break
+
+            for status in statuses[start_pos:end_pos]:
+                yield status
+
+            max_id = status[u'id'] - 1
+
+            # if the page has apply filter and found the post id, it should be the last page
+            if 0 < (end_pos - start_pos) < MAX_WEIBO_PER_PAGE:
+                logging.info("reach the last page for since_id %s and max_id %s", since_id, max_id)
+                break
+
+            # go to the next page
+            start_page += 1
+
     def search_friendships(self, max_id=None, since_id=None):
         """
         Return all the results with optional max_id, since_id and get
         back an iterator for decoded weibo post.
-        :param since_id:
-        :param max_id:
+        :param since_id: it will return the weibo with id larger than the id
+        :param max_id: it will return the weibo with id smaller than the id
         """
         log.info("starting search for max_id:%s, since_id:%s.", max_id, since_id)
         friendships_url = "statuses/friends_timeline"
@@ -276,11 +343,46 @@ class Weiboarc(object):
             log.error("creating client session error,%s", e)
             raise e
 
+    def _lower_bound(self, weibos, max_id):
+        """
+        Finding the lower bound of the position to insert the max weibo id
+        for i<left weibos[low]['id']>max_id
+        :param weibos: the weibos need to deal with
+        :param max_id: the target weibo id
+        :return: the position for insert the max_id
+        """
+        left, right = 0, len(weibos) - 1
+        while left <= right:
+            mid = (left + right) / 2
+            if weibos[mid][u'id'] >= max_id:
+                left = mid + 1
+            else:
+                right = mid - 1
+        return left
+
+    def _upper_bound(self, weibos, since_id):
+        """
+        Finding the upper bound of the position to insert the since weibo id
+        for i>right weibos[high]['id']<since_post_id
+        :param weibos: the weibos need to deal with
+        :param since_id: the target since weibo id
+        :return: the position for insert the since_id
+        """
+        left, right = 0, len(weibos) - 1
+        while left <= right:
+            mid = (left + right) / 2
+            if weibos[mid][u'id'] > since_id:
+                left = mid + 1
+            else:
+                right = mid - 1
+        return left
+
 
 class APIError(StandardError):
     """
     raise APIError if got failed message from the API not the http error.
     """
+
     def __init__(self, error_code, error, request):
         self.error_code = error_code
         self.error = error
@@ -296,6 +398,7 @@ class Client(object):
     Refer from https://github.com/lxyu/weibo/blob/master/weibo.py
     Since we need deal withe the http response error code
     """
+
     def __init__(self, access_token, api_key=None, api_secret=None, redirect_uri=None):
         # const define
         self.site = 'https://api.weibo.com/'
@@ -329,7 +432,6 @@ class Client(object):
         url = "{0}{1}.json".format(self.api_url, uri)
 
         res = self.session.get(url, params=kwargs)
-
         # other error code with server will be deal in low level app
         # 403 for invalid access token and rate limit
         # 400 for information of expire token
