@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 weibo1 = {"reposts_count": 0, "biz_feature": 0, "truncated": False,
           "text": "\u7ec4\u56e2\u770b\u300a\u8001\u70ae\u300b\u7684\u4e8b\u6ca1\u4eba\u63d0\u4e86\uff0c\u63a5\u4e0b\u6765\u5c31\u662f\u5ce1\u8c37\u5c0f\u7ec49\u4eba\u89c1\u9762\u4f1a\uff0c\u4eca\u5929\u5c31\u5fd9\u8fd9\u4e2a\u3002\u56de\u6765\u65f6\u987a\u8def\u53c2\u89c2\u4e86\u65b0\u5f00\u4e1a\u7684\u4e07\u8c61\u6c47\uff0c\u53c8\u53bb\u5750\u4e86\u4e00\u4f1a\u4e50\u5929\u866b\uff0c\u8fd8\u662f\u6709\u70b9\u5fd9\u4e71\uff0c\u6700\u540e\u4e5f\u6ca1\u5fc3\u601d\u53bb\u6e38\u6cf3\u4e86\u3002\u5c0f\u4e8c\u7ec8\u4e8e\u56de\u4fe1\u4e86\uff0c\u8bf4\u65b0\u5e74\u65f6\u5728\u4e1c\u4eac\uff0c\u90a3\u91cc\u7684\u4eba\u4e8b\u6709\u53d8\u52a8\uff0c\u624d\u56de\u5230\u7f8e\u5170\u3002\u6709\u5927\u80f8\u6000\uff0c\u4e5f\u4e0d\u5931\u5c0f\u813e\u6c14\uff0c\u4f60\u5bf9\u4e16\u754c\u7684\u7b97\u6cd5\uff0c\u597d\u50cf\u8ddf\u6211\u4e0d\u592a\u4e00\u6837\u3002",
           "visible": {"type": 0, "list_id": 0}, "in_reply_to_status_id": "", "rid": "43_0_1_2666867909921964318",
@@ -231,3 +234,561 @@ weibo5 = {u'reposts_count': 0, u'biz_feature': 0, u'truncated': False,
           u'created_at': u'Wed May 11 03:10:19 +0800 2016', u'mlevel': 0, u'comments_count': 0}
 
 
+# statues no pic_ids and retweeted_status has
+weibo6 = {
+    "created_at": "Fri Jan 06 14:27:41 +0800 2017",
+    "id": 4060927646547531,
+    "mid": "4060927646547531",
+    "idstr": "4060927646547531",
+    "text": u"【2016年本市28件重要民生实事项目全面落实】#美丽北京·民生#",
+    "source_allowclick": 0,
+    "source_type": 1,
+    "source": u"<a href=\"http://app.weibo.com/t/feed/1tqBja\" rel=\"nofollow\">360安全浏览器</a>",
+    "appid": 615949,
+    "favorited": False,
+    "truncated": False,
+    "in_reply_to_status_id": "",
+    "in_reply_to_user_id": "",
+    "in_reply_to_screen_name": "",
+    "pic_ids": [
+
+    ],
+    "geo": None,
+    "user": {
+        "id": 2611704925,
+        "idstr": "2611704925",
+        "class": 1,
+        "screen_name": u"商汇北京",
+        "name": u"商汇北京",
+        "province": "11",
+        "city": "1000",
+        "location": u"北京",
+        "description": u"这里是北京市工商业联合会（北京市商会）官方微博。守望北京民营经济、参与构建和谐社会，在这儿您可了解北京非公经济的新闻资讯，期待您的持续关注！",
+        "url": "",
+        "profile_image_url": "http://tva4.sinaimg.cn/crop.0.0.180.180.50/9bab745djw1e8qgp5bmzyj2050050aa8.jpg",
+        "profile_url": "shanghuibeijing",
+        "domain": "shanghuibeijing",
+        "weihao": "",
+        "gender": "m",
+        "followers_count": 1283645,
+        "friends_count": 134,
+        "pagefriends_count": 0,
+        "statuses_count": 6927,
+        "favourites_count": 22,
+        "created_at": "Fri Feb 10 13:59:37 +0800 2012",
+        "following": False,
+        "allow_all_act_msg": True,
+        "geo_enabled": False,
+        "verified": True,
+        "verified_type": 1,
+        "ptype": 0,
+        "allow_all_comment": True,
+        "avatar_large": "http://tva4.sinaimg.cn/crop.0.0.180.180.180/9bab745djw1e8qgp5bmzyj2050050aa8.jpg",
+        "avatar_hd": "http://tva4.sinaimg.cn/crop.0.0.180.180.1024/9bab745djw1e8qgp5bmzyj2050050aa8.jpg",
+        "verified_reason": u"北京市工商业联合会（北京市商会）官方微博",
+        "verified_trade": "",
+        "verified_reason_url": "",
+        "verified_source": "",
+        "verified_source_url": "",
+        "verified_state": 0,
+        "verified_level": 3,
+        "verified_type_ext": 0,
+        "verified_reason_modified": "",
+        "verified_contact_name": "",
+        "verified_contact_email": "",
+        "verified_contact_mobile": "",
+        "follow_me": False,
+        "online_status": 0,
+        "bi_followers_count": 107,
+        "lang": "zh-cn",
+        "star": 0,
+        "mbtype": 0,
+        "mbrank": 0,
+        "block_word": 0,
+        "block_app": 0,
+        "ulevel": 0,
+        "badge_top": "",
+        "has_ability_tag": 1,
+        "extend": {
+            "privacy": {
+                "mobile": 0
+            },
+            "mbprivilege": "0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        "credit_score": 80,
+        "user_ability": 0,
+        "urank": 26
+    },
+    "retweeted_status": {
+        "created_at": "Fri Jan 06 10:25:18 +0800 2017",
+        "id": 4060866649060260,
+        "mid": "4060866649060260",
+        "idstr": "4060866649060260",
+        "text": u"【2016年本市28件重要民生实事项目全面落实】#美丽北京·民生#在市有关部门、各区政府的共同努力下，2016年本市为群众办理的28件重要民生实事项目全部落实。http://t.cn/RvmH0PN",
+        "textLength": 149,
+        "source_allowclick": 0,
+        "source_type": 1,
+        "source": u"<a href=\"http://app.weibo.com/t/feed/3napkb\" rel=\"nofollow\">政务直通车</a>",
+        "appid": 1847484,
+        "favorited": False,
+        "truncated": False,
+        "in_reply_to_status_id": "",
+        "in_reply_to_user_id": "",
+        "in_reply_to_screen_name": "",
+        "pic_ids": [
+            "006pxJAvgw1fbgmdthaz8j30db1ntqi7",
+            "006pF9q7gw1fbgmdxi4oqj30db1uc17u",
+            "006pGttogw1fbgmer6ls5j30db24xdys",
+            "006pJ9CWgw1fbgmehv679j30db2a2kba"
+        ],
+        "thumbnail_pic": "http://ww4.sinaimg.cn/thumbnail/006pxJAvgw1fbgmdthaz8j30db1ntqi7.jpg",
+        "bmiddle_pic": "http://ww4.sinaimg.cn/bmiddle/006pxJAvgw1fbgmdthaz8j30db1ntqi7.jpg",
+        "original_pic": "http://ww4.sinaimg.cn/large/006pxJAvgw1fbgmdthaz8j30db1ntqi7.jpg",
+        "geo": None,
+        "user": {
+            "id": 2418724427,
+            "idstr": "2418724427",
+            "class": 1,
+            "screen_name": u"北京发布",
+            "name": u"北京发布",
+            "province": "11",
+            "city": "1",
+            "location": u"北京 东城区",
+            "description": u"传递政务信息，提供群众服务资讯，倾听您的诉求，关注您所关注。爱生活，爱北京。这里是北京市政府新闻办官方微博，欢迎朋友们与我们以及“北京微博发布厅”成员单位互动交流。 北京微博发布厅：http://focus.weibo.com/pub/i/zt/beijing",
+            "url": "",
+            "profile_image_url": "http://tva2.sinaimg.cn/crop.0.0.179.179.50/902ace4bjw1ekungjxf4aj205005074l.jpg",
+            "cover_image": "http://ww1.sinaimg.cn/crop.0.0.920.300/902ace4bjw1eum8ptxfn9j20pk08ctfa.jpg",
+            "cover_image_phone": "http://ww1.sinaimg.cn/crop.0.0.640.640.640/9d44112bjw1f1xl1c10tuj20hs0hs0tw.jpg",
+            "profile_url": "bjfbt",
+            "domain": "bjfbt",
+            "weihao": "",
+            "gender": "m",
+            "followers_count": 7963280,
+            "friends_count": 499,
+            "pagefriends_count": 75,
+            "statuses_count": 42697,
+            "favourites_count": 136,
+            "created_at": "Wed Oct 19 15:52:46 +0800 2011",
+            "following": False,
+            "allow_all_act_msg": False,
+            "geo_enabled": False,
+            "verified": True,
+            "verified_type": 1,
+            "ptype": 0,
+            "allow_all_comment": True,
+            "avatar_large": "http://tva2.sinaimg.cn/crop.0.0.179.179.180/902ace4bjw1ekungjxf4aj205005074l.jpg",
+            "avatar_hd": "http://tva2.sinaimg.cn/crop.0.0.179.179.1024/902ace4bjw1ekungjxf4aj205005074l.jpg",
+            "verified_reason": u"北京市政府新闻办公室官方微博",
+            "verified_trade": "",
+            "verified_reason_url": "",
+            "verified_source": "",
+            "verified_source_url": "",
+            "verified_state": 0,
+            "verified_level": 3,
+            "verified_type_ext": 0,
+            "verified_reason_modified": "",
+            "verified_contact_name": "",
+            "verified_contact_email": "",
+            "verified_contact_mobile": "",
+            "follow_me": False,
+            "online_status": 0,
+            "bi_followers_count": 273,
+            "lang": "zh-cn",
+            "star": 0,
+            "mbtype": 2,
+            "mbrank": 4,
+            "block_word": 0,
+            "block_app": 0,
+            "ulevel": 0,
+            "badge_top": "",
+            "has_ability_tag": 1,
+            "extend": {
+                "privacy": {
+                    "mobile": 0
+                },
+                "mbprivilege": "0000000000000000000000000000000000000000000000000000000000000000"
+            },
+            "credit_score": 80,
+            "user_ability": 772,
+            "urank": 38
+        },
+        "reposts_count": 10,
+        "comments_count": 9,
+        "attitudes_count": 2,
+        "isLongText": True,
+        "mlevel": 0,
+        "visible": {
+            "type": 0,
+            "list_id": 0
+        },
+        "biz_feature": 0,
+        "page_type": 32,
+        "url_objects": [
+            {
+                "url_ori": u"美丽北京·民生",
+                "object_id": "1022:100808d590058894615acdfc0d3f7998afab47",
+                "object": {
+                    "object_id": "1022:100808d590058894615acdfc0d3f7998afab47",
+                    "containerid": "100808d590058894615acdfc0d3f7998afab47",
+                    "object_domain_id": "1022",
+                    "object_type": "topic",
+                    "safe_status": 1,
+                    "show_status": "10",
+                    "act_status": "00",
+                    "last_modified": "Mon Aug 08 17:02:31 CST 2016",
+                    "timestamp": 1470646951838,
+                    "uuid": 4006243541724555,
+                    "activate_status": "0",
+                    "object": {
+                        "summary": "",
+                        "location": "0-0",
+                        "create_at": "1470646479",
+                        "image": {
+                            "url": "http://ww1.sinaimg.cn/thumbnail/902ace4bjw1f6mg43t0i8j2050050q38.jpg"
+                        },
+                        "attribute": "1",
+                        "url": "http://huati.weibo.com/4122412",
+                        "biz": {
+                            "biz_id": "100808",
+                            "containerid": "100808d590058894615acdfc0d3f7998afab47"
+                        },
+                        "id": "1022:100808d590058894615acdfc0d3f7998afab47",
+                        "object_type": "topic",
+                        "display_name": u"美丽北京·民生",
+                        "category": u"政务|147",
+                        "short_url": "http://t.cn/Rt9eO8w",
+                        "presenter_status": "1",
+                        "tid": "4122412",
+                        "target_url": u"http://huati.weibo.com/k/美丽北京·民生",
+                        "mobile": {
+                            "page_id": "100808d590058894615acdfc0d3f7998afab47",
+                            "card": {
+                                "status": "0"
+                            },
+                            "url": {
+                                "scheme": u"sinaweibo://pageinfo?pageid=100808d590058894615acdfc0d3f7998afab47&extparam=美丽北京·民生",
+                                "status": "1",
+                                "name": u"美丽北京·民生"
+                            }
+                        }
+                    }
+                },
+                "like_count": 51,
+                "isActionType": False,
+                "follower_count": 49,
+                "asso_like_count": 0,
+                "card_info_un_integrity": False,
+                "super_topic_status_count": 0,
+                "super_topic_photo_count": 0
+            }
+        ],
+        "hasActionTypeCard": 0,
+        "darwin_tags": [
+
+        ],
+        "hot_weibo_tags": [
+            {
+                "tag_name": u"北京",
+                "tag_scheme": "sinaweibo://cardlist?containerid=102803_ctg1_1552_-_ctg1_1552_-_province_id_-_11_-_city_id_-_0_-_page_type_-_1&extparam=from_mixbottomtag_-_tagmid_4060866649060260",
+                "tag_hidden": 1,
+                "tag_type": 2,
+                "url_type_pic": "http://h5.sinaimg.cn/upload/2015/12/02/142/timeline_icon_hot.png",
+                "tag_weight": 1,
+                "from_cateid": "1552",
+                "containerid": "102803_ctg1_1552_-_ctg1_1552_-_province_id_-_11_-_city_id_-_0_-_page_type_-_1"
+            },
+            {
+                "tag_name": u"社会",
+                "tag_scheme": "sinaweibo://cardlist?containerid=102803_ctg1_4188_-_ctg1_4188&extparam=from_mixbottomtag_-_tagmid_4060866649060260",
+                "tag_hidden": 1,
+                "tag_type": 2,
+                "url_type_pic": "http://h5.sinaimg.cn/upload/2015/12/02/142/timeline_icon_hot.png",
+                "tag_weight": 0.69999694824219,
+                "from_cateid": "4188",
+                "containerid": "102803_ctg1_4188_-_ctg1_4188"
+            }
+        ],
+        "text_tag_tips": [
+
+        ],
+        "userType": 0,
+        "positive_recom_flag": 0,
+        "gif_ids": "",
+        "is_show_bulletin": 2
+    },
+    "reposts_count": 0,
+    "comments_count": 0,
+    "attitudes_count": 0,
+    "isLongText": False,
+    "mlevel": 0,
+    "visible": {
+        "type": 0,
+        "list_id": 0
+    },
+    "biz_feature": 0,
+    "page_type": 32,
+    "url_objects": [
+        {
+            "url_ori": u"美丽北京·民生",
+            "object_id": "1022:100808d590058894615acdfc0d3f7998afab47",
+            "object": {
+                "object_id": "1022:100808d590058894615acdfc0d3f7998afab47",
+                "containerid": "100808d590058894615acdfc0d3f7998afab47",
+                "object_domain_id": "1022",
+                "object_type": "topic",
+                "safe_status": 1,
+                "show_status": "10",
+                "act_status": "00",
+                "last_modified": "Mon Aug 08 17:02:31 CST 2016",
+                "timestamp": 1470646951838,
+                "uuid": 4006243541724555,
+                "activate_status": "0",
+                "object": {
+                    "summary": "",
+                    "location": "0-0",
+                    "create_at": "1470646479",
+                    "image": {
+                        "url": "http://ww1.sinaimg.cn/thumbnail/902ace4bjw1f6mg43t0i8j2050050q38.jpg"
+                    },
+                    "attribute": "1",
+                    "url": "http://huati.weibo.com/4122412",
+                    "biz": {
+                        "biz_id": "100808",
+                        "containerid": "100808d590058894615acdfc0d3f7998afab47"
+                    },
+                    "id": "1022:100808d590058894615acdfc0d3f7998afab47",
+                    "object_type": "topic",
+                    "display_name": u"美丽北京·民生",
+                    "category": u"政务|147",
+                    "short_url": "http://t.cn/Rt9eO8w",
+                    "presenter_status": "1",
+                    "tid": "4122412",
+                    "target_url": u"http://huati.weibo.com/k/美丽北京·民生",
+                    "mobile": {
+                        "page_id": "100808d590058894615acdfc0d3f7998afab47",
+                        "card": {
+                            "status": "0"
+                        },
+                        "url": {
+                            "scheme": u"sinaweibo://pageinfo?pageid=100808d590058894615acdfc0d3f7998afab47&extparam=美丽北京·民生",
+                            "status": "1",
+                            "name": u"美丽北京·民生"
+                        }
+                    }
+                }
+            },
+            "like_count": 51,
+            "isActionType": False,
+            "follower_count": 49,
+            "asso_like_count": 0,
+            "card_info_un_integrity": False,
+            "super_topic_status_count": 0,
+            "super_topic_photo_count": 0
+        }
+    ],
+    "hasActionTypeCard": 0,
+    "darwin_tags": [
+
+    ],
+    "hot_weibo_tags": [
+
+    ],
+    "text_tag_tips": [
+
+    ],
+    "rid": "8_0_0_2633227587167337612",
+    "userType": 0,
+    "positive_recom_flag": 0,
+    "gif_ids": "",
+    "is_show_bulletin": 2,
+    "category": 31
+}
+
+# statues with pictures
+weibo7 = {
+    "created_at": "Fri Jan 06 14:30:25 +0800 2017",
+    "id": 4060928330955796,
+    "mid": "4060928330955796",
+    "idstr": "4060928330955796",
+    "text": u"【2016年温州人最爱吃什么蔬菜？牛心包菜卫冕冠军】#民生汇#小布从温州市菜篮子农副市场获悉，2016年温州市蔬菜成交量排行榜出炉，牛心包菜以10162万公斤的总成绩再一次登上“销量王”位置，盘菜成为“十佳新秀”。",
+    "textLength": 199,
+    "source_allowclick": 0,
+    "source_type": 1,
+    "source": u"<a href=\"http://app.weibo.com/t/feed/3napkb\" rel=\"nofollow\">政务直通车</a>",
+    "appid": 1847484,
+    "favorited": False,
+    "truncated": False,
+    "in_reply_to_status_id": "",
+    "in_reply_to_user_id": "",
+    "in_reply_to_screen_name": "",
+    "pic_ids": [
+        "006pGttogw1fbglhniavcj30m80fc42e",
+        "006pGsTCgw1fbglhpdiupj30du07dmye"
+    ],
+    "thumbnail_pic": "http://ww3.sinaimg.cn/thumbnail/006pGttogw1fbglhniavcj30m80fc42e.jpg",
+    "bmiddle_pic": "http://ww3.sinaimg.cn/bmiddle/006pGttogw1fbglhniavcj30m80fc42e.jpg",
+    "original_pic": "http://ww3.sinaimg.cn/large/006pGttogw1fbglhniavcj30m80fc42e.jpg",
+    "geo": None,
+    "user": {
+        "id": 3909815234,
+        "idstr": "3909815234",
+        "class": 1,
+        "screen_name": u"温州发布",
+        "name": u"温州发布",
+        "province": "33",
+        "city": "1000",
+        "location": u"浙江",
+        "description": u"景秀瓯越，时尚之都，商通陆海，温暖之州。这里有权威发布的态度，要闻聚焦的热度，民生关注的温度，温州市人民政府新闻办公室官方微博，与您携手！",
+        "url": "",
+        "profile_image_url": "http://tva3.sinaimg.cn/crop.27.0.1575.1575.50/e90b0bc2gw1ejtuf4n2svj219d17zdp9.jpg",
+        "cover_image": "http://ww2.sinaimg.cn/crop.0.0.980.300/e90b0bc2gw1eequfasvmtj20r808cn2t.jpg",
+        "cover_image_phone": "http://ww1.sinaimg.cn/crop.0.0.640.640.640/6cf8d7ebjw1ehfr4xa8psj20hs0hsgpg.jpg",
+        "profile_url": "wenzhoufabu",
+        "domain": "wenzhoufabu",
+        "weihao": "",
+        "gender": "m",
+        "followers_count": 311279,
+        "friends_count": 481,
+        "pagefriends_count": 8,
+        "statuses_count": 11518,
+        "favourites_count": 13,
+        "created_at": "Tue Nov 26 15:02:04 +0800 2013",
+        "following": False,
+        "allow_all_act_msg": False,
+        "geo_enabled": True,
+        "verified": True,
+        "verified_type": 1,
+        "ptype": 200,
+        "allow_all_comment": True,
+        "avatar_large": "http://tva3.sinaimg.cn/crop.27.0.1575.1575.180/e90b0bc2gw1ejtuf4n2svj219d17zdp9.jpg",
+        "avatar_hd": "http://tva3.sinaimg.cn/crop.27.0.1575.1575.1024/e90b0bc2gw1ejtuf4n2svj219d17zdp9.jpg",
+        "verified_reason": u"浙江省温州市政府新闻办公室官方微博",
+        "verified_trade": "",
+        "verified_reason_url": "",
+        "verified_source": "",
+        "verified_source_url": "",
+        "verified_state": 0,
+        "verified_level": 3,
+        "verified_type_ext": 0,
+        "verified_reason_modified": "",
+        "verified_contact_name": "",
+        "verified_contact_email": "",
+        "verified_contact_mobile": "",
+        "follow_me": False,
+        "online_status": 0,
+        "bi_followers_count": 213,
+        "lang": "zh-cn",
+        "star": 0,
+        "mbtype": 0,
+        "mbrank": 0,
+        "block_word": 0,
+        "block_app": 0,
+        "ulevel": 0,
+        "badge_top": "",
+        "has_ability_tag": 1,
+        "extend": {
+            "privacy": {
+                "mobile": 0
+            },
+            "mbprivilege": "0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        "credit_score": 80,
+        "user_ability": 0,
+        "urank": 31
+    },
+    "reposts_count": 2,
+    "comments_count": 3,
+    "attitudes_count": 6,
+    "isLongText": False,
+    "mlevel": 0,
+    "visible": {
+        "type": 0,
+        "list_id": 0
+    },
+    "biz_feature": 0,
+    "page_type": 32,
+    "url_objects": [
+        {
+            "url_ori": u"民生汇",
+            "object_id": "1022:10080876c0b3b8c6fa97607c3be8bd1da73158",
+            "object": {
+                "object_id": "1022:10080876c0b3b8c6fa97607c3be8bd1da73158",
+                "containerid": "10080876c0b3b8c6fa97607c3be8bd1da73158",
+                "object_domain_id": "1022",
+                "object_type": "topic",
+                "safe_status": 1,
+                "show_status": "10",
+                "act_status": "00",
+                "last_modified": "Sat Nov 14 00:02:51 CST 2015",
+                "timestamp": 1447430571365,
+                "uuid": 3587629042946138,
+                "activate_status": "0",
+                "object": {
+                    "id": "1022:10080876c0b3b8c6fa97607c3be8bd1da73158",
+                    "object_type": "topic",
+                    "summary": "",
+                    "display_name": u"民生汇",
+                    "short_url": "http://t.cn/zHH90NF",
+                    "image": {
+                        "url": "http://ww2.sinaimg.cn/thumb180/74f67c55jw9exzskjqhgaj2050050jrb.jpg"
+                    },
+                    "presenter_status": "1",
+                    "url": "http://weibo.cn/pages/10080876c0b3b8c6fa97607c3be8bd1da73158",
+                    "mobile": {
+                        "page_id": "10080876c0b3b8c6fa97607c3be8bd1da73158",
+                        "card": {
+                            "scheme": "sinaweibo://pageinfo?pageid=10080876c0b3b8c6fa97607c3be8bd1da73158&extparam=%E6%B0%91%E7%94%9F%E6%B1%87",
+                            "status": "0",
+                            "contents": [
+                                u"#民生汇#"
+                            ],
+                            "pic": "http://u1.sinaimg.cn/upload/2012/12/28/ht_page_icon.png"
+                        },
+                        "url": {
+                            "scheme": "sinaweibo://pageinfo?pageid=10080876c0b3b8c6fa97607c3be8bd1da73158&extparam=%E6%B0%91%E7%94%9F%E6%B1%87",
+                            "status": "1",
+                            "name": u"民生汇"
+                        }
+                    },
+                    "biz": {
+                        "biz_id": "100808",
+                        "containerid": "10080876c0b3b8c6fa97607c3be8bd1da73158"
+                    },
+                    "target_url": "http://weibo.cn/pages/10080876c0b3b8c6fa97607c3be8bd1da73158"
+                }
+            },
+            "like_count": 62,
+            "isActionType": False,
+            "follower_count": 41,
+            "asso_like_count": 0,
+            "card_info_un_integrity": False,
+            "super_topic_status_count": 0,
+            "super_topic_photo_count": 0
+        }
+    ],
+    "hasActionTypeCard": 0,
+    "darwin_tags": [
+
+    ],
+    "hot_weibo_tags": [
+        {
+            "tag_name": u"温州",
+            "tag_scheme": "sinaweibo://cardlist?containerid=102803_ctg1_1552_-_ctg1_1552_-_province_id_-_33_-_city_id_-_3_-_page_type_-_1&extparam=from_mixbottomtag_-_tagmid_4060928330955796",
+            "tag_hidden": 1,
+            "tag_type": 2,
+            "url_type_pic": "http://h5.sinaimg.cn/upload/2015/12/02/142/timeline_icon_hot.png",
+            "tag_weight": 1,
+            "from_cateid": "1552",
+            "containerid": "102803_ctg1_1552_-_ctg1_1552_-_province_id_-_33_-_city_id_-_3_-_page_type_-_1"
+        }
+    ],
+    "text_tag_tips": [
+
+    ],
+    "rid": "7_0_0_2633227587167337612",
+    "userType": 0,
+    "positive_recom_flag": 0,
+    "gif_ids": "",
+    "is_show_bulletin": 2,
+    "category": 31
+}

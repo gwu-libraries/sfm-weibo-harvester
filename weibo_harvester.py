@@ -97,17 +97,18 @@ class WeiboHarvester(BaseHarvester):
                 weibo_id = weibo.get("id")
                 if not self.incremental:
                     self.result.increment_stats("weibos")
-                    self._process_options(weibo)
+                    self._process_search_options(weibo['retweeted_status'] if 'retweeted_status' in weibo else weibo)
                 else:
                     since_id = self.state_store.get_state(__name__, key) or 0
                     if key not in since_weibo_ids:
                         since_weibo_ids[key] = since_id
                     if weibo_id > since_id:
                         # Update state
-                        self.state_store.set_state(__name__, key,  weibo_id)
+                        self.state_store.set_state(__name__, key, weibo_id)
                     if weibo_id > since_weibo_ids[key]:
                         self.result.increment_stats("weibos")
-                        self._process_options(weibo)
+                        self._process_search_options(
+                            weibo['retweeted_status'] if 'retweeted_status' in weibo else weibo)
 
     def process_timeline_warc(self, warc_filepath):
         for count, status in enumerate(WeiboWarcIter(warc_filepath)):
@@ -121,9 +122,42 @@ class WeiboHarvester(BaseHarvester):
                     key = u"{}.since_id".format(self.message["collection_set"]["id"])
                     self.state_store.set_state(__name__, key,
                                                max(self.state_store.get_state(__name__, key), weibo.get("id")))
-                self._process_options(weibo['retweeted_status'] if 'retweeted_status' in weibo else weibo)
+                self._process_timeline_options(weibo['retweeted_status'] if 'retweeted_status' in weibo else weibo)
 
-    def _process_options(self, weibo):
+    def _process_search_options(self, weibo):
+        # the search statues has a filed named `url_objects`, it contains the urls related to the weibo topic page
+        # since weibo has anti-crawler, will not collect the pages in weibo topic pages
+
+        if self.extract_web_resources:
+            # URL-1 analyzing the url in text field and adding the short url in lists
+            self.result.urls.extend(self._regex_links(weibo['text'].encode('utf-8')))
+            # URL-2 adding the long text url
+            if 'isLongText' in weibo and weibo['isLongText']:
+                self.result.urls.append(
+                    'http://m.weibo.cn/' + weibo['user']['idstr'] + '/' + weibo['mid'])
+
+        # a field name `pic_ids` marked all picture id in the posts, need to combine the urls
+        # a filed 'thumbnail_pic' has the total url of the pictures like
+        # "http://ww3.sinaimg.cn/thumbnail/006pGttogw1fbglhniavcj30m80fc42e.jpg",
+        # we need to get the prefix of the url "http://ww3.sinaimg.cn/" first, the piture urls is
+        # http://ww3.sinaimg.cn/+picture_size_identify+id+".jpg"
+        if len(self.extract_images_sizes) != 0 and 'pic_ids' in weibo and len(weibo['pic_ids']) != 0:
+            # get the prefix of the url
+            url_str = weibo['thumbnail_pic']
+            prefix = url_str[0:url_str.find("thumbnail")]
+            # URL-3 adding the photo url with the large size
+
+            if "Large" in self.extract_images_sizes:
+                self.result.urls.extend(
+                    map(lambda x: "{}large/{}.jpg".format(prefix, x), weibo['pic_ids']))
+            if "Medium" in self.extract_images_sizes:
+                self.result.urls.extend(
+                    map(lambda x: "{}bmiddle/{}.jpg".format(prefix, x), weibo['pic_ids']))
+            if "Thumbnail" in self.extract_images_sizes:
+                self.result.urls.extend(
+                    map(lambda x: "{}thumbnail/{}.jpg".format(prefix, x), weibo['pic_ids']))
+
+    def _process_timeline_options(self, weibo):
         if self.extract_web_resources:
             # URL-1 analyzing the url in text field and adding the short url in lists
             self.result.urls.extend(self._regex_links(weibo['text'].encode('utf-8')))

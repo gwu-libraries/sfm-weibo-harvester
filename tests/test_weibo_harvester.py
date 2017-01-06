@@ -4,7 +4,7 @@
 from __future__ import absolute_import
 import tests
 import vcr as base_vcr
-from tests.weibos import weibo1, weibo2, weibo3, weibo4, weibo5
+from tests.weibos import weibo1, weibo2, weibo3, weibo4, weibo5, weibo6, weibo7
 import unittest
 from mock import MagicMock, patch, call
 from kombu import Connection, Exchange, Queue, Producer
@@ -164,16 +164,15 @@ class TestWeiboHarvester(tests.TestCase):
 
     @patch("weibo_harvester.Weiboarc", autospec=True)
     def test_incremental_search_timeline(self, mock_weiboarc_class):
-        message = copy.deepcopy(base_timeline_message)
-        message["options"]["incremental"] = True
-        self.harvester.message = message
-
         mock_weiboarc = MagicMock(spec=Weiboarc)
         # Expecting 2 searches. First returns 2 weibos,one is none. Second returns none.
         mock_weiboarc.search_friendships.side_effect = [(weibo2,), ()]
         # Return mock_weiboarc when instantiating a weiboarc.
         mock_weiboarc_class.side_effect = [mock_weiboarc]
 
+        message = copy.deepcopy(base_timeline_message)
+        message["options"]["incremental"] = True
+        self.harvester.message = message
         collection_set_id = self.harvester.message["collection_set"]["id"]
         self.harvester.state_store.set_state("weibo_harvester", u"{}.since_id".format(collection_set_id),
                                              3927348724716740)
@@ -190,7 +189,7 @@ class TestWeiboHarvester(tests.TestCase):
     def test_search_topic(self, mock_weiboarc_class):
         mock_weiboarc = MagicMock(spec=Weiboarc)
         # search_topic Expecting 2 results. First returns 1tweets. Second returns none.
-        mock_weiboarc.search_topic.side_effect = [(weibo1, weibo2), ()]
+        mock_weiboarc.search_topic.side_effect = [(weibo6, weibo7), ()]
         # Return mock_weiboarc when instantiating a weiboarc.
         mock_weiboarc_class.side_effect = [mock_weiboarc]
 
@@ -205,23 +204,23 @@ class TestWeiboHarvester(tests.TestCase):
 
     @patch("weibo_harvester.Weiboarc", autospec=True)
     def test_incremental_search_topic(self, mock_weiboarc_class):
+        mock_weiboarc = MagicMock(spec=Weiboarc)
+        # search_topic Expecting 2 searches. First returns 1 weibos
+        mock_weiboarc.search_topic.side_effect = [(weibo7,), ()]
+        # Return mock_weiboarc when instantiating a weiboarc.
+        mock_weiboarc_class.side_effect = [mock_weiboarc]
+
         message = copy.deepcopy(base_search_message)
         message["options"]["incremental"] = True
         self.harvester.message = message
 
-        mock_weiboarc = MagicMock(spec=Weiboarc)
-        # search_topic Expecting 2 searches. First returns 1 weibos
-        mock_weiboarc.search_topic.side_effect = [(weibo2,), ()]
-        # Return mock_weiboarc when instantiating a weiboarc.
-        mock_weiboarc_class.side_effect = [mock_weiboarc]
-
         query = self.harvester.message["seeds"][0]["token"]
         self.harvester.state_store.set_state("weibo_harvester", u"{}.since_id".format(query),
-                                             3927348724716740)
+                                             4060927646547531)
         self.harvester.harvest_seeds()
 
         mock_weiboarc_class.assert_called_once_with(tests.WEIBO_ACCESS_TOKEN)
-        self.assertEqual([call(query, since_id=3927348724716740)], mock_weiboarc.search_topic.mock_calls)
+        self.assertEqual([call(query, since_id=4060927646547531)], mock_weiboarc.search_topic.mock_calls)
         self.assertDictEqual({"weibos": 1}, self.harvester.result.harvest_counter)
 
     @staticmethod
@@ -279,15 +278,14 @@ class TestWeiboHarvester(tests.TestCase):
 
     @patch("weibo_harvester.WeiboWarcIter", autospec=True)
     def test_process_search_topic(self, iter_class):
-        self.harvester.message = base_search_message
-
         mock_iter = MagicMock(spec=WeiboWarcIter)
         mock_iter.__iter__.side_effect = [
-            self._iter_items([weibo3, weibo4, weibo5]).__iter__()]
+            self._iter_items([weibo6, weibo7]).__iter__()]
         iter_class.side_effect = [mock_iter]
 
+        self.harvester.message = base_search_message
         self.harvester.process_warc("test.warc.gz")
-        self.assertDictEqual({"weibos": 3}, self.harvester.result.stats_summary())
+        self.assertDictEqual({"weibos": 2}, self.harvester.result.stats_summary())
         self.assertEqual(0, len(self.harvester.result.urls_as_set()))
         iter_class.assert_called_once_with("test.warc.gz")
         # State updated
@@ -296,36 +294,40 @@ class TestWeiboHarvester(tests.TestCase):
 
     @patch("weibo_harvester.WeiboWarcIter", autospec=True)
     def test_process_search_topic_incremental(self, iter_class):
-        # change the message type to weibo_search
-        message = copy.deepcopy(base_search_message)
-        message["options"]["incremental"] = True
-        self.harvester.message = message
-
-        self.harvester.extract_media = False
-        self.harvester.extract_web_resources = True
-
         mock_iter = MagicMock(spec=WeiboWarcIter)
         mock_iter.__iter__.side_effect = [
-            self._iter_items([weibo3, weibo4, weibo5]).__iter__()]
+            self._iter_items([weibo6, weibo7]).__iter__()]
         iter_class.side_effect = [mock_iter]
+
+        self.harvester.message = base_search_message
+        self.harvester.extract_images_sizes = ["Large"]
+        self.harvester.extract_web_resources = False
+        self.harvester.incremental = True
 
         # check the result
         query = self.harvester.message["seeds"][0]["token"]
-        self.harvester.state_store.set_state("weibo_harvester", u"{}.since_id".format(query), 3927348724716740)
+        self.harvester.state_store.set_state("weibo_harvester", u"{}.since_id".format(query), 4060927646547530)
         self.harvester.process_warc("test.warc.gz")
 
-        self.assertDictEqual({"weibos": 3}, self.harvester.result.stats_summary())
+        self.assertDictEqual({"weibos": 2}, self.harvester.result.stats_summary())
         self.assertSetEqual({
-            'http://t.cn/RqmQ3ko',
-            'http://m.weibo.cn/1618051664/3973767505640890'
+            'http://ww3.sinaimg.cn/large/006pGttogw1fbglhniavcj30m80fc42e.jpg',
+            'http://ww3.sinaimg.cn/large/006pGsTCgw1fbglhpdiupj30du07dmye.jpg',
+            'http://ww4.sinaimg.cn/large/006pxJAvgw1fbgmdthaz8j30db1ntqi7.jpg',
+            'http://ww4.sinaimg.cn/large/006pF9q7gw1fbgmdxi4oqj30db1uc17u.jpg',
+            'http://ww4.sinaimg.cn/large/006pGttogw1fbgmer6ls5j30db24xdys.jpg',
+            'http://ww4.sinaimg.cn/large/006pJ9CWgw1fbgmehv679j30db2a2kba.jpg'
         }, self.harvester.result.urls_as_set())
+
         iter_class.assert_called_once_with("test.warc.gz")
         # State updated
-        self.assertEqual(3927348724716740,
+        self.assertEqual(4060928330955796,
                          self.harvester.state_store.get_state("weibo_harvester", u"{}.since_id".format(query)))
 
     @patch("weibo_harvester.WeiboWarcIter", autospec=True)
-    def test_process_harvest_options_web(self, iter_class):
+    def test_process_harvest_timeline_options_web(self, iter_class):
+        self.harvester.message = base_timeline_message
+
         mock_iter = MagicMock(spec=WeiboWarcIter)
         mock_iter.__iter__.side_effect = [
             self._iter_items([weibo3, weibo4, weibo5]).__iter__()]
@@ -346,7 +348,32 @@ class TestWeiboHarvester(tests.TestCase):
         iter_class.assert_called_once_with("test.warc.gz")
 
     @patch("weibo_harvester.WeiboWarcIter", autospec=True)
-    def test_process_harvest_options_media(self, iter_class):
+    def test_process_harvest_search_options_web(self, iter_class):
+        self.harvester.message = base_search_message
+
+        mock_iter = MagicMock(spec=WeiboWarcIter)
+        mock_iter.__iter__.side_effect = [
+            self._iter_items([weibo6, weibo7]).__iter__()]
+        iter_class.side_effect = [mock_iter]
+
+        # These are default harvest options
+        self.harvester.extract_web_resources = True
+        self.harvester.extract_images_sizes = []
+        self.harvester.incremental = False
+
+        self.harvester.process_warc("test.warc.gz")
+
+        # Testing URL1&URL2
+        self.assertSetEqual({
+            'http://t.cn/RvmH0PN',
+            'http://m.weibo.cn/2418724427/4060866649060260'
+        }, self.harvester.result.urls_as_set())
+        iter_class.assert_called_once_with("test.warc.gz")
+
+    @patch("weibo_harvester.WeiboWarcIter", autospec=True)
+    def test_process_harvest_timeline_options_media(self, iter_class):
+        self.harvester.message = base_timeline_message
+
         mock_iter = MagicMock(spec=WeiboWarcIter)
         mock_iter.__iter__.side_effect = [
             self._iter_items([weibo3, weibo4, weibo5]).__iter__()]
@@ -367,6 +394,33 @@ class TestWeiboHarvester(tests.TestCase):
             'http://ww4.sinaimg.cn/bmiddle/60718250jw1f3qtzyhai3j20de0vin32.jpg',
             'http://ww2.sinaimg.cn/thumbnail/6b23a52bgw1f3pjhhyofnj208p06c3yq.jpg',
             'http://ww4.sinaimg.cn/thumbnail/60718250jw1f3qtzyhai3j20de0vin32.jpg'
+        }, self.harvester.result.urls_as_set())
+        iter_class.assert_called_once_with("test.warc.gz")
+
+    @patch("weibo_harvester.WeiboWarcIter", autospec=True)
+    def test_process_harvest_search_options_media(self, iter_class):
+        self.harvester.message = base_search_message
+
+        mock_iter = MagicMock(spec=WeiboWarcIter)
+        mock_iter.__iter__.side_effect = [
+            self._iter_items([weibo7]).__iter__()]
+        iter_class.side_effect = [mock_iter]
+
+        # These are default harvest options
+        self.harvester.extract_web_resources = False
+        self.harvester.extract_images_sizes = ["Large", "Medium", "Thumbnail"]
+        self.harvester.incremental = False
+
+        self.harvester.process_warc("test.warc.gz")
+
+        # Testing URL3 photos URLs
+        self.assertSetEqual({
+            'http://ww3.sinaimg.cn/large/006pGttogw1fbglhniavcj30m80fc42e.jpg',
+            'http://ww3.sinaimg.cn/large/006pGsTCgw1fbglhpdiupj30du07dmye.jpg',
+            'http://ww3.sinaimg.cn/bmiddle/006pGttogw1fbglhniavcj30m80fc42e.jpg',
+            'http://ww3.sinaimg.cn/bmiddle/006pGsTCgw1fbglhpdiupj30du07dmye.jpg',
+            'http://ww3.sinaimg.cn/thumbnail/006pGttogw1fbglhniavcj30m80fc42e.jpg',
+            'http://ww3.sinaimg.cn/thumbnail/006pGsTCgw1fbglhpdiupj30du07dmye.jpg'
         }, self.harvester.result.urls_as_set())
         iter_class.assert_called_once_with("test.warc.gz")
 
