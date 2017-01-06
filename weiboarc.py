@@ -197,6 +197,7 @@ class Weiboarc(object):
         """
         log.info(u"starting search for topic:%s.", q)
         search_url = "search/topics"
+        # for MAX_WEIBO_PER_PAGE, if set==50, sometime it returns 48 or 49 in one page.
         params = {
             'count': MAX_WEIBO_PER_PAGE,
             'q': q
@@ -233,7 +234,7 @@ class Weiboarc(object):
             max_id = status[u'id'] - 1
 
             # if the page has apply filter and found the post id, it should be the last page
-            if 0 < (end_pos - start_pos) < MAX_WEIBO_PER_PAGE:
+            if 0 < (end_pos - start_pos) < len(statuses):
                 logging.info("reach the last page for since_id %s and max_id %s", since_id, max_id)
                 break
 
