@@ -16,6 +16,7 @@ import shutil
 import tempfile
 import time
 import os
+import copy
 from datetime import datetime, date
 from weibo_harvester import WeiboHarvester
 from weibo_warc_iter import WeiboWarcIter
@@ -26,6 +27,50 @@ vcr = base_vcr.VCR(
     record_mode='once',
 )
 
+base_timeline_message = {
+    "id": "test:1",
+    "type": "weibo_timeline",
+    "path": "/collections/test_collection_set",
+    "credentials": {
+        "access_token": tests.WEIBO_ACCESS_TOKEN
+    },
+    "collection_set": {
+        "id": "test_collection_set"
+    },
+    "collection": {
+        "id": "test_collection"
+    },
+    "options": {
+        "web_resources": True,
+        "image_sizes": ["Large"]
+    }
+}
+
+base_search_message = {
+    "id": "test:2",
+    "type": "weibo_search",
+    "path": "/collections/test_collection_set",
+    "seeds": [
+        {
+            "id": "seed_id1",
+            "token": u"春晚"
+        }
+    ],
+    "credentials": {
+        "access_token": tests.WEIBO_ACCESS_TOKEN
+    },
+    "collection_set": {
+        "id": "test_collection_set"
+    },
+    "collection": {
+        "id": "test_collection"
+    },
+    "options": {
+        "web_resources": True,
+        "image_sizes": ["Large"]
+    }
+}
+
 
 @unittest.skipIf(not tests.test_config_available, "Skipping test since test config not available.")
 class TestWeiboHarvesterVCR(tests.TestCase):
@@ -35,28 +80,15 @@ class TestWeiboHarvesterVCR(tests.TestCase):
         self.harvester.state_store = DictHarvestStateStore()
         self.harvester.result = HarvestResult()
         self.harvester.stop_harvest_seeds_event = threading.Event()
-        self.harvester.message = {
-            "id": "test:2",
-            "type": "weibo_timeline",
-            "path": "/collections/test_collection_set",
-            "credentials": {
-                "access_token": tests.WEIBO_ACCESS_TOKEN
-            },
-            "collection_set": {
-                "id": "test_collection_set"
-            },
-            "collection": {
-                "id": "test_collection"
-            },
-            "options": {}
-        }
+        self.harvester.message = base_timeline_message
 
     def tearDown(self):
         if os.path.exists(self.working_path):
             shutil.rmtree(self.working_path)
 
     @vcr.use_cassette(filter_query_parameters=['access_token'])
-    def test_search_vcr(self):
+    def test_timeline_vcr(self):
+        self.harvester.message = base_timeline_message
         self.harvester.harvest_seeds()
         # check the total number, for new users don't how to check
         self.assertEqual(self.harvester.result.harvest_counter["weibos"], 181)
@@ -64,8 +96,10 @@ class TestWeiboHarvesterVCR(tests.TestCase):
         self.assertTrue(self.harvester.result.success)
 
     @vcr.use_cassette(filter_query_parameters=['access_token'])
-    def test_incremental_search_vcr(self):
-        self.harvester.message["options"]["incremental"] = True
+    def test_incremental_timeline_vcr(self):
+        message = copy.deepcopy(base_timeline_message)
+        message["options"]["incremental"] = True
+        self.harvester.message = message
         collection_set_id = self.harvester.message["collection_set"]["id"]
         self.harvester.state_store.set_state("weibo_harvester", u"{}.since_id".format(collection_set_id),
                                              3935747172100551)
@@ -76,6 +110,29 @@ class TestWeiboHarvesterVCR(tests.TestCase):
         # for check the number of get
         self.assertEqual(self.harvester.result.harvest_counter["weibos"], 5)
 
+    @vcr.use_cassette(filter_query_parameters=['access_token'])
+    def test_search_topic_vcr(self):
+        self.harvester.message = base_search_message
+        self.harvester.harvest_seeds()
+        # check the total number, one search return 200
+        self.assertEqual(self.harvester.result.harvest_counter["weibos"], 200)
+        self.assertTrue(self.harvester.result.success)
+
+    @vcr.use_cassette(filter_query_parameters=['access_token'])
+    def test_incremental_search_topic_vcr(self):
+        message = copy.deepcopy(base_search_message)
+        message["options"]["incremental"] = True
+        self.harvester.message = message
+        query = self.harvester.message["seeds"][0]["token"]
+        self.harvester.state_store.set_state("weibo_harvester", u"{}.since_id".format(query),
+                                             4061065610091375)
+        self.harvester.harvest_seeds()
+
+        # Check harvest result
+        self.assertTrue(self.harvester.result.success)
+        # for check the number, it count as 6
+        self.assertEqual(self.harvester.result.harvest_counter["weibos"], 6)
+
 
 class TestWeiboHarvester(tests.TestCase):
     def setUp(self):
@@ -84,24 +141,7 @@ class TestWeiboHarvester(tests.TestCase):
         self.harvester.state_store = DictHarvestStateStore()
         self.harvester.result = HarvestResult()
         self.harvester.stop_harvest_seeds_event = threading.Event()
-        self.harvester.message = {
-            "id": "test:1",
-            "type": "weibo_timeline",
-            "path": "/collections/test_collection_set",
-            "credentials": {
-                "access_token": tests.WEIBO_ACCESS_TOKEN
-            },
-            "collection_set": {
-                "id": "test_collection_set"
-            },
-            "collection": {
-                "id": "test_collection"
-            },
-            "options": {
-                "web_resources": True,
-                "image_sizes": ["Large"]
-            }
-        }
+        self.harvester.message = base_timeline_message
 
     def tearDown(self):
         if os.path.exists(self.working_path):
@@ -115,6 +155,7 @@ class TestWeiboHarvester(tests.TestCase):
         # Return mock_weiboarc when instantiating a weiboarc.
         mock_weiboarc_class.side_effect = [mock_weiboarc]
 
+        self.harvester.message = base_timeline_message
         self.harvester.harvest_seeds()
         self.assertDictEqual({"weibos": 2}, self.harvester.result.harvest_counter)
         mock_weiboarc_class.assert_called_once_with(tests.WEIBO_ACCESS_TOKEN)
@@ -122,17 +163,16 @@ class TestWeiboHarvester(tests.TestCase):
         self.assertEqual([call(since_id=None)], mock_weiboarc.search_friendships.mock_calls)
 
     @patch("weibo_harvester.Weiboarc", autospec=True)
-    def test_incremental_search(self, mock_weiboarc_class):
+    def test_incremental_search_timeline(self, mock_weiboarc_class):
+        message = copy.deepcopy(base_timeline_message)
+        message["options"]["incremental"] = True
+        self.harvester.message = message
+
         mock_weiboarc = MagicMock(spec=Weiboarc)
         # Expecting 2 searches. First returns 2 weibos,one is none. Second returns none.
         mock_weiboarc.search_friendships.side_effect = [(weibo2,), ()]
         # Return mock_weiboarc when instantiating a weiboarc.
         mock_weiboarc_class.side_effect = [mock_weiboarc]
-
-        self.harvester.message["options"] = {
-            # Incremental means that will only retrieve new results.
-            "incremental": True
-        }
 
         collection_set_id = self.harvester.message["collection_set"]["id"]
         self.harvester.state_store.set_state("weibo_harvester", u"{}.since_id".format(collection_set_id),
@@ -146,6 +186,44 @@ class TestWeiboHarvester(tests.TestCase):
         self.assertEqual([call(since_id=3927348724716740)], mock_weiboarc.search_friendships.mock_calls)
         self.assertNotEqual([call(since_id=None)], mock_weiboarc.search_friendships.mock_calls)
 
+    @patch("weibo_harvester.Weiboarc", autospec=True)
+    def test_search_topic(self, mock_weiboarc_class):
+        mock_weiboarc = MagicMock(spec=Weiboarc)
+        # search_topic Expecting 2 results. First returns 1tweets. Second returns none.
+        mock_weiboarc.search_topic.side_effect = [(weibo1, weibo2), ()]
+        # Return mock_weiboarc when instantiating a weiboarc.
+        mock_weiboarc_class.side_effect = [mock_weiboarc]
+
+        self.harvester.message = base_search_message
+        self.harvester.harvest_seeds()
+        query = self.harvester.message["seeds"][0]["token"]
+
+        self.assertDictEqual({"weibos": 2}, self.harvester.result.harvest_counter)
+        mock_weiboarc_class.assert_called_once_with(tests.WEIBO_ACCESS_TOKEN)
+
+        self.assertEqual([call(query, since_id=None)], mock_weiboarc.search_topic.mock_calls)
+
+    @patch("weibo_harvester.Weiboarc", autospec=True)
+    def test_incremental_search_topic(self, mock_weiboarc_class):
+        message = copy.deepcopy(base_search_message)
+        message["options"]["incremental"] = True
+        self.harvester.message = message
+
+        mock_weiboarc = MagicMock(spec=Weiboarc)
+        # search_topic Expecting 2 searches. First returns 1 weibos
+        mock_weiboarc.search_topic.side_effect = [(weibo2,), ()]
+        # Return mock_weiboarc when instantiating a weiboarc.
+        mock_weiboarc_class.side_effect = [mock_weiboarc]
+
+        query = self.harvester.message["seeds"][0]["token"]
+        self.harvester.state_store.set_state("weibo_harvester", u"{}.since_id".format(query),
+                                             3927348724716740)
+        self.harvester.harvest_seeds()
+
+        mock_weiboarc_class.assert_called_once_with(tests.WEIBO_ACCESS_TOKEN)
+        self.assertEqual([call(query, since_id=3927348724716740)], mock_weiboarc.search_topic.mock_calls)
+        self.assertDictEqual({"weibos": 1}, self.harvester.result.harvest_counter)
+
     @staticmethod
     def _iter_items(items):
         # This is useful for mocking out a warc iter
@@ -155,7 +233,7 @@ class TestWeiboHarvester(tests.TestCase):
         return iter_items
 
     @patch("weibo_harvester.WeiboWarcIter", autospec=True)
-    def test_process(self, iter_class):
+    def test_process_timeline(self, iter_class):
         mock_iter = MagicMock(spec=WeiboWarcIter)
         mock_iter.__iter__.side_effect = [
             self._iter_items([weibo3, weibo4, weibo5]).__iter__()]
@@ -166,6 +244,7 @@ class TestWeiboHarvester(tests.TestCase):
         self.harvester.extract_images_sizes = []
         self.harvester.incremental = False
 
+        self.harvester.message = base_timeline_message
         self.harvester.process_warc("test.warc.gz")
 
         # The default will not sending web harvest
@@ -176,7 +255,7 @@ class TestWeiboHarvester(tests.TestCase):
         self.assertIsNone(self.harvester.state_store.get_state("weibo_harvester", "test_collection_set.since_id"))
 
     @patch("weibo_harvester.WeiboWarcIter", autospec=True)
-    def test_process_incremental(self, iter_class):
+    def test_process_timeline_incremental(self, iter_class):
         mock_iter = MagicMock(spec=WeiboWarcIter)
         mock_iter.__iter__.side_effect = [
             self._iter_items([weibo3, weibo4, weibo5]).__iter__()]
@@ -187,6 +266,7 @@ class TestWeiboHarvester(tests.TestCase):
         self.harvester.extract_images_sizes = []
         self.harvester.incremental = True
         self.harvester.state_store.set_state("weibo_harvester", "test_collection_set.since_id", 3927348724716740)
+        self.harvester.message = base_timeline_message
         self.harvester.process_warc("test.warc.gz")
 
         # The default will not sending web harvest
@@ -196,6 +276,53 @@ class TestWeiboHarvester(tests.TestCase):
         # State updated
         self.assertEqual(3973784090711192, self.harvester.state_store.get_state("weibo_harvester",
                                                                                 "test_collection_set.since_id"))
+
+    @patch("weibo_harvester.WeiboWarcIter", autospec=True)
+    def test_process_search_topic(self, iter_class):
+        self.harvester.message = base_search_message
+
+        mock_iter = MagicMock(spec=WeiboWarcIter)
+        mock_iter.__iter__.side_effect = [
+            self._iter_items([weibo3, weibo4, weibo5]).__iter__()]
+        iter_class.side_effect = [mock_iter]
+
+        self.harvester.process_warc("test.warc.gz")
+        self.assertDictEqual({"weibos": 3}, self.harvester.result.stats_summary())
+        self.assertEqual(0, len(self.harvester.result.urls_as_set()))
+        iter_class.assert_called_once_with("test.warc.gz")
+        # State updated
+        query = self.harvester.message["seeds"][0]["token"]
+        self.assertEqual(None, self.harvester.state_store.get_state("weibo_harvester", u"{}.since_id".format(query)))
+
+    @patch("weibo_harvester.WeiboWarcIter", autospec=True)
+    def test_process_search_topic_incremental(self, iter_class):
+        # change the message type to weibo_search
+        message = copy.deepcopy(base_search_message)
+        message["options"]["incremental"] = True
+        self.harvester.message = message
+
+        self.harvester.extract_media = False
+        self.harvester.extract_web_resources = True
+
+        mock_iter = MagicMock(spec=WeiboWarcIter)
+        mock_iter.__iter__.side_effect = [
+            self._iter_items([weibo3, weibo4, weibo5]).__iter__()]
+        iter_class.side_effect = [mock_iter]
+
+        # check the result
+        query = self.harvester.message["seeds"][0]["token"]
+        self.harvester.state_store.set_state("weibo_harvester", u"{}.since_id".format(query), 3927348724716740)
+        self.harvester.process_warc("test.warc.gz")
+
+        self.assertDictEqual({"weibos": 3}, self.harvester.result.stats_summary())
+        self.assertSetEqual({
+            'http://t.cn/RqmQ3ko',
+            'http://m.weibo.cn/1618051664/3973767505640890'
+        }, self.harvester.result.urls_as_set())
+        iter_class.assert_called_once_with("test.warc.gz")
+        # State updated
+        self.assertEqual(3927348724716740,
+                         self.harvester.state_store.get_state("weibo_harvester", u"{}.since_id".format(query)))
 
     @patch("weibo_harvester.WeiboWarcIter", autospec=True)
     def test_process_harvest_options_web(self, iter_class):
@@ -276,7 +403,68 @@ class TestWeiboHarvesterIntegration(tests.TestCase):
         if self.path:
             shutil.rmtree(self.path, ignore_errors=True)
 
-    def test_search(self):
+    def test_search_topic(self):
+        self.path = "/sfm-data/collection_set/test_collection/test_1"
+        harvest_msg = {
+            "id": "test:1",
+            "type": "weibo_search",
+            "path": self.path,
+            "seeds": [
+                {
+                    "id": "seed_id1",
+                    "token": u"春晚"
+                }
+            ],
+            "credentials": {
+                "access_token": tests.WEIBO_ACCESS_TOKEN
+            },
+            "collection_set": {
+                "id": "test_collection_set"
+            },
+            "collection": {
+                "id": "test_collection"
+            },
+            "options": {
+                "web_resources": True,
+                "image_sizes": [
+                    "Thumbnail",
+                    "Medium",
+                    "Large"
+                ]
+            }
+        }
+        with self._create_connection() as connection:
+            bound_exchange = self.exchange(connection)
+            producer = Producer(connection, exchange=bound_exchange)
+            producer.publish(harvest_msg, routing_key="harvest.start.weibo.weibo_search")
+
+            status_msg = self._wait_for_message(self.result_queue, connection)
+            # Matching ids
+            self.assertEqual("test:1", status_msg["id"])
+            # Running
+            self.assertEqual(STATUS_RUNNING, status_msg["status"])
+
+            # Another running message
+            status_msg = self._wait_for_message(self.result_queue, connection)
+            self.assertEqual(STATUS_RUNNING, status_msg["status"])
+
+            # Now wait for result message.
+            result_msg = self._wait_for_message(self.result_queue, connection)
+            # Matching ids
+            self.assertEqual("test:1", result_msg["id"])
+            # Success
+            self.assertEqual(STATUS_SUCCESS, result_msg["status"])
+            # Some tweets
+            self.assertTrue(result_msg["stats"][date.today().isoformat()]["weibos"])
+
+            # Web harvest message.
+            web_harvest_msg = self._wait_for_message(self.web_harvest_queue, connection)
+            self.assertTrue(len(web_harvest_msg["seeds"]))
+
+            # Warc created message.
+            self.assertTrue(self._wait_for_message(self.warc_created_queue, connection))
+
+    def test_search_timeline(self):
         self.path = "/sfm-data/collection_set/test_collection/test_3"
         harvest_msg = {
             "id": "test:3",
