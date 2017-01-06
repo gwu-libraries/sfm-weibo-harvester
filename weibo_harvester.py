@@ -11,8 +11,8 @@ import re
 log = logging.getLogger(__name__)
 
 QUEUE = "weibo_harvester"
-SEARCH_ROUTING_KEY = "harvest.start.twitter.weibo_search"
-TIMELINE_ROUTING_KEY = "harvest.start.twitter.weibo_timeline"
+SEARCH_ROUTING_KEY = "harvest.start.weibo.weibo_search"
+TIMELINE_ROUTING_KEY = "harvest.start.weibo.weibo_timeline"
 RE_LINKS = re.compile(r'(http://t.cn/[a-zA-z0-9]+)')
 
 
