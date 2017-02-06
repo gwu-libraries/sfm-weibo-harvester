@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='sfmweiboharvester',
-    version='1.4.3',
+    version='1.5.0',
     url='https://github.com/gwu-libraries/sfm-weibo-harvester',
     author='Vict Tan',
     author_email='ychtan@email.gwu.edu',
