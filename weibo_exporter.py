@@ -10,6 +10,7 @@ from dateutil.parser import parse as date_parse
 log = logging.getLogger(__name__)
 
 QUEUE = "weibo_exporter"
+SEARCH_ROUTING_KEY = "export.start.weibo.weibo_search"
 TIME_LINE_ROUTING_KEY = "export.start.weibo.weibo_timeline"
 RE_LINKS = re.compile(r'(http://t.cn/[a-zA-z0-9]+)')
 RE_TOPIC = re.compile(ur'#[\w\\\s\u4e00-\u9fff]+#')
@@ -81,4 +82,4 @@ class WeiboExporter(BaseExporter):
 
 
 if __name__ == "__main__":
-    WeiboExporter.main(WeiboExporter, QUEUE, [TIME_LINE_ROUTING_KEY])
+    WeiboExporter.main(WeiboExporter, QUEUE, [SEARCH_ROUTING_KEY, TIME_LINE_ROUTING_KEY])
