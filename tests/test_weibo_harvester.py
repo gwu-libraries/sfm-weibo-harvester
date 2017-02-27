@@ -457,67 +457,6 @@ class TestWeiboHarvesterIntegration(tests.TestCase):
         if self.path:
             shutil.rmtree(self.path, ignore_errors=True)
 
-    def test_search_topic(self):
-        self.path = "/sfm-data/collection_set/test_collection/test_1"
-        harvest_msg = {
-            "id": "test:1",
-            "type": "weibo_search",
-            "path": self.path,
-            "seeds": [
-                {
-                    "id": "seed_id1",
-                    "token": u"春晚"
-                }
-            ],
-            "credentials": {
-                "access_token": tests.WEIBO_ACCESS_TOKEN
-            },
-            "collection_set": {
-                "id": "test_collection_set"
-            },
-            "collection": {
-                "id": "test_collection"
-            },
-            "options": {
-                "web_resources": True,
-                "image_sizes": [
-                    "Thumbnail",
-                    "Medium",
-                    "Large"
-                ]
-            }
-        }
-        with self._create_connection() as connection:
-            bound_exchange = self.exchange(connection)
-            producer = Producer(connection, exchange=bound_exchange)
-            producer.publish(harvest_msg, routing_key="harvest.start.weibo.weibo_search")
-
-            status_msg = self._wait_for_message(self.result_queue, connection)
-            # Matching ids
-            self.assertEqual("test:1", status_msg["id"])
-            # Running
-            self.assertEqual(STATUS_RUNNING, status_msg["status"])
-
-            # Another running message
-            status_msg = self._wait_for_message(self.result_queue, connection)
-            self.assertEqual(STATUS_RUNNING, status_msg["status"])
-
-            # Now wait for result message.
-            result_msg = self._wait_for_message(self.result_queue, connection)
-            # Matching ids
-            self.assertEqual("test:1", result_msg["id"])
-            # Success
-            self.assertEqual(STATUS_SUCCESS, result_msg["status"])
-            # Some tweets
-            self.assertTrue(result_msg["stats"][date.today().isoformat()]["weibos"])
-
-            # Web harvest message.
-            web_harvest_msg = self._wait_for_message(self.web_harvest_queue, connection)
-            self.assertTrue(len(web_harvest_msg["seeds"]))
-
-            # Warc created message.
-            self.assertTrue(self._wait_for_message(self.warc_created_queue, connection))
-
     def test_search_timeline(self):
         self.path = "/sfm-data/collection_set/test_collection/test_3"
         harvest_msg = {
