@@ -211,7 +211,7 @@ class Weiboarc(object):
                 break
 
             resp = self.get(search_url, **params)
-            statuses = resp.json()['statuses']
+            statuses = resp.json()['statuses'] if 'statuses' in resp.json() else []
 
             if len(statuses) == 0:
                 logging.info("reach the end of calling for weibos statues.")
@@ -262,7 +262,7 @@ class Weiboarc(object):
                 params['max_id'] = max_id
 
             resp = self.get(friendships_url, **params)
-            statuses = resp.json()['statuses']
+            statuses = resp.json()['statuses'] if 'statuses' in resp.json() else []
 
             if len(statuses) == 0:
                 log.info("no new weibo post matching %s", params)
