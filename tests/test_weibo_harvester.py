@@ -119,6 +119,14 @@ class TestWeiboHarvesterVCR(tests.TestCase):
         self.assertTrue(self.harvester.result.success)
 
     @vcr.use_cassette(filter_query_parameters=['access_token'])
+    def test_search_topic_empty_vcr(self):
+        self.harvester.message = base_search_message
+        self.harvester.harvest_seeds()
+        # check the total number, one search return 0 with empty list
+        self.assertEqual(self.harvester.result.harvest_counter["weibos"], 0)
+        self.assertTrue(self.harvester.result.success)
+
+    @vcr.use_cassette(filter_query_parameters=['access_token'])
     def test_incremental_search_topic_vcr(self):
         message = copy.deepcopy(base_search_message)
         message["options"]["incremental"] = True

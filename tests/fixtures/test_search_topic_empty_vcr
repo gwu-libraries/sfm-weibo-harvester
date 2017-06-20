@@ -1,0 +1,23 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.9.1]
+    method: GET
+    uri: https://api.weibo.com/2/search/topics.json?count=50&page=1&q=%E6%98%A5%E6%99%9A
+  response:
+    body: {string: !!python/unicode '[]'}
+    headers:
+      connection: [keep-alive]
+      content-length: ['649746']
+      content-type: [application/json; charset=UTF-8]
+      date: ['Fri, 06 Jan 2017 15:42:58 GMT']
+      server: [nginx/1.6.1]
+      sina-lb: [aGEuMTY5LmcxLmh5ZHMubGIuc2luYW5vZGUuY29t]
+      sina-ts: [NGI2ZWMzNjggMCAzNiAzNiA3IDM1MAo=]
+      x-powered-by: [PHP/5.4.40]
+    status: {code: 200, message: OK}
+version: 1
