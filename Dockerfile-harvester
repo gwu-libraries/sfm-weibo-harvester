@@ -5,6 +5,7 @@ ADD . /opt/sfm-weibo-harvester/
 WORKDIR /opt/sfm-weibo-harvester
 RUN pip install -r requirements/common.txt -r requirements/release.txt
 
-CMD sh /opt/sfm-setup/setup_reqs.sh \
-    && appdeps.py --wait-secs 60 --port-wait mq:5672 --file-wait /sfm-data/collection_set --file-wait /sfm-data/containers \
-    && gosu sfm python weibo_harvester.py --debug=$DEBUG --debug-warcprox=$DEBUG_WARCPROX service mq $RABBITMQ_USER $RABBITMQ_PASSWORD /sfm-data/containers/$HOSTNAME --tries=$HARVEST_TRIES
+ADD docker/harvester/invoke.sh /opt/sfm-setup/
+RUN chmod +x /opt/sfm-setup/invoke.sh
+
+CMD ["/opt/sfm-setup/invoke.sh"]
