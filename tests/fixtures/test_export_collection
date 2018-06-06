@@ -7,9 +7,9 @@ interactions:
       Connection: [keep-alive]
       User-Agent: [python-requests/2.9.1]
     method: GET
-    uri: http://127.0.0.1:8080/api/v1/warcs/?collection=afe49fc673ab4380909e06f43b46a990&exclude_web=True
+    uri: http://127.0.0.1:8080/api/v1/warcs/?collection=afe49fc673ab4380909e06f43b46a990
   response:
-    body: {string: !!python/unicode '[{"warc_id":"be7553f7d4d94ba488116f57ed3de829","path":"2/2016/04/25/20/3a3f522447d1482f8f8dd0018b00bd35-20160425202046193-00000-39-6f576f468fe9-8000.warc.gz","sha1":"c6f89fc09fbb336541c205dc4884592434b43816","bytes":104672,"date_created":"2016-04-25T15:20:49.261213Z"}]'}
+    body: {string: !!python/unicode '{"results": [{"warc_id":"be7553f7d4d94ba488116f57ed3de829","path":"2/2016/04/25/20/3a3f522447d1482f8f8dd0018b00bd35-20160425202046193-00000-39-6f576f468fe9-8000.warc.gz","sha1":"c6f89fc09fbb336541c205dc4884592434b43816","bytes":104672,"date_created":"2016-04-25T15:20:49.261213Z"}], "next":null}'}
     headers:
       allow: ['GET, HEAD, OPTIONS']
       connection: [Keep-Alive]
