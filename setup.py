@@ -4,8 +4,8 @@ setup(
     name='sfmweiboharvester',
     version='1.12.0',
     url='https://github.com/gwu-libraries/sfm-weibo-harvester',
-    author='Vict Tan',
-    author_email='ychtan@email.gwu.edu',
+    author='Social Feed Manager',
+    author_email='sfm@gwu.edu',
     description="Social Feed Manager Weibo Harvester",
     platforms=['POSIX'],
     test_suite='tests',
@@ -18,7 +18,7 @@ setup(
     classifiers=[
         'Intended Audience :: Developers',
         'Topic :: Software Development :: Libraries :: Python Modules',
-        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
         'Development Status :: 4 - Beta',
     ],
 )

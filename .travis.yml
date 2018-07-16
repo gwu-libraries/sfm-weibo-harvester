@@ -1,6 +1,6 @@
 language: python
 python:
-- '2.7'
+- '3.6'
 sudo: required
 services:
 - docker
@@ -15,7 +15,7 @@ install: pip install -r requirements/common.txt -r requirements/master.txt
 script: python -m unittest discover
 notifications:
   email:
-  - ychtan@email.gwu.edu
+  - sfm@gwu.edu
   slack:
     secure: nnNX+geFEZGE10TZOvkrbJF5aKM/vRpyweJxdbud5BKm4bNbzZKl1nUJEC6yvwd0GHSxb6WzoXcPSmvP4DdxF2deCqtCQdj+Dv4muF7FjOq+RlHQB8xKrSLIHa8ER+h0zT9aDIY5ioPGWtPC5NVBoNbugot9/faD8amHREAA/E8geWtMYjVsVxcbe2LR2DD1y8nV4JGm0Hv1uGw2oWESRM77glN88zQDaWvEKiVQZTJaheBxBwuXpThzqqC/cfbvVjslLJeaHG5HTtOgDLPFqR09gi9wWZ1vKDBzSh/a09FfUHdncbPGjXCAmBNP5PBrcapXUmOTNeuQaQQyvY7FHjSp1EBZjv7lIASTrstmaC3ttIxG74DOR/IqjovojmzSmCwsuCUwKqA6tBto3UETk1rehr2QX6mEurXwniTX0TUT5AIGcNkPPsgardO3N18PpA2mRPrd3mAFogIKuoH1lhZ398848T1SMdV6NX3eWFaa1ljd2UhEYrZB6/m1DezneIGGuen7rAzjcfi9z7jgA2HoELbZdzCvVLgRZvrJNaD8cfEZ+Zw0yJPdGRXiqBebWGgAPHfDiluEfz42c67B7qfP+iKZwlCyIgTbmDtxuz49YhFti6mczbuPKmx4jGEEnmmEK1td02btkyKCqFHG+8/TmanI3VLqd6ErcmtPPGE=
     on_success: never

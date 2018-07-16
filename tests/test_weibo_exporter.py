@@ -50,7 +50,7 @@ class TestWeiboExporterVcr(tests.TestCase):
         if os.path.exists(self.export_path):
             shutil.rmtree(self.export_path)
         if os.path.exists(self.working_path):
-            shutil.rmtree((self.working_path))
+            shutil.rmtree(self.working_path)
 
     @vcr.use_cassette()
     def test_export_collection(self):

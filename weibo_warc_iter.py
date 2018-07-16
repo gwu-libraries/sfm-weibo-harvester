@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 from __future__ import absolute_import
 from sfmutils.warc_iter import BaseWarcIter
@@ -25,6 +25,7 @@ class WeiboWarcIter(BaseWarcIter):
         if not self.limit_user_ids or item.get("user", {}).get("idstr") in self.limit_user_ids:
             return True
         return False
+
 
 if __name__ == "__main__":
     WeiboWarcIter.main(WeiboWarcIter)

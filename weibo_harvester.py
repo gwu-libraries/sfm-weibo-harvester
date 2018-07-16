@@ -6,7 +6,6 @@ import logging
 from sfmutils.harvester import BaseHarvester
 from weiboarc import Weiboarc
 from weibo_warc_iter import WeiboWarcIter
-import re
 
 log = logging.getLogger(__name__)
 
@@ -112,7 +111,7 @@ class WeiboHarvester(BaseHarvester):
                     # Update state
                     key = u"{}.since_id".format(self.message["collection_set"]["id"])
                     self.state_store.set_state(__name__, key,
-                                               max(self.state_store.get_state(__name__, key), weibo.get("id")))
+                                               max(self.state_store.get_state(__name__, key) or 0, weibo.get("id")))
 
 
 if __name__ == "__main__":

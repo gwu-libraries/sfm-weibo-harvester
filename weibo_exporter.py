@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from sfmutils.exporter import ExportResult, BaseExporter, BaseTable
+from sfmutils.exporter import BaseExporter, BaseTable
 from weibo_warc_iter import WeiboWarcIter
 import logging
 import re
@@ -13,7 +13,7 @@ QUEUE = "weibo_exporter"
 SEARCH_ROUTING_KEY = "export.start.weibo.weibo_search"
 TIME_LINE_ROUTING_KEY = "export.start.weibo.weibo_timeline"
 RE_LINKS = re.compile(r'(http://t.cn/[a-zA-z0-9]+)')
-RE_TOPIC = re.compile(ur'#[\w\\\s\u4e00-\u9fff]+#')
+RE_TOPIC = re.compile(r'#[\w\\\s\u4e00-\u9fff]+#')
 
 
 class WeiboStatusTable(BaseTable):
@@ -62,13 +62,15 @@ class WeiboStatusTable(BaseTable):
     def id_field(self):
         return "weibo_id"
 
-    def _regex_links(self, text):
+    @staticmethod
+    def _regex_links(text):
         """
         A list of bare urls from weibo text
         """
         return RE_LINKS.findall(text)
 
-    def _regex_topic(self, text):
+    @staticmethod
+    def _regex_topic(text):
         """
         A list of topic from weibo text
         """

@@ -309,6 +309,7 @@ class TestWeiboHarvester(tests.TestCase):
         self.assertEqual(4060928330955796,
                          self.harvester.state_store.get_state("weibo_harvester", u"{}.since_id".format(query)))
 
+
 @unittest.skipIf(not tests.test_config_available, "Skipping test since test config not available.")
 @unittest.skipIf(not tests.integration_env_available, "Skipping test since integration env not available.")
 class TestWeiboHarvesterIntegration(tests.TestCase):

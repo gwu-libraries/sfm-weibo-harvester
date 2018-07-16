@@ -10,18 +10,12 @@ import json
 import requests
 import argparse
 from datetime import datetime, timedelta
-from twarc import get_input, catch_conn_reset
+import configparser
 
 log = logging.getLogger(__name__)
 
-try:
-    import configparser  # Python 3
-except ImportError:
-    import ConfigParser as configparser  # Python 2
-
 # Max weibos in per page
 MAX_WEIBO_PER_PAGE = 50
-
 
 # Error code for weibo api
 # 10022   IP requests out of rate limit
@@ -70,7 +64,7 @@ def main():
             access_token = credentials['access_token']
         else:
             print("Please enter weibo authentication credentials")
-            access_token = get_input('access_token: ')
+            access_token = input('access_token: ')
 
             save_keys(args.profile, access_token)
 
@@ -92,7 +86,7 @@ def main():
         if u'mid' in weibo:
             log.info("archived weibo [%s]:[%s]", weibo[u'user'][u'screen_name'], weibo[u"mid"])
         else:
-            log.warn(json.dumps(weibo))
+            log.warning(json.dumps(weibo))
 
 
 def save_config(filename, profile, access_token):
@@ -136,6 +130,24 @@ def default_config_filename():
     return os.path.join(home, ".weiboarc")
 
 
+def catch_conn_reset(f):
+    """
+    A decorator to handle connection reset errors even ones from pyOpenSSL
+    until https://github.com/edsu/twarc/issues/72 is resolved
+    """
+    try:
+        import OpenSSL
+        ConnectionError = OpenSSL.SSL.SysCallError
+    except:
+        ConnectionError = requests.exceptions.ConnectionError
+    def new_f(self, *args, **kwargs):
+        try:
+            return f(self, *args, **kwargs)
+        except ConnectionError:
+            self._connect()
+            return f(self, *args, **kwargs)
+    return new_f
+
 def status_error(f):
     """
     A decorator to handle http response error from the Weibo API.
@@ -151,21 +163,21 @@ def status_error(f):
                 return resp
             elif resp.status_code == 404:
                 errors += 1
-                logging.warn("404:Not found url! Sleep 1s to try again...")
+                logging.warning("404:Not found url! Sleep 1s to try again...")
                 if errors > 10:
-                    logging.warn("Too many errors 404, stop!")
+                    logging.warning("Too many errors 404, stop!")
                     resp.raise_for_status()
-                logging.warn("%s from request URL, sleeping 1s", resp.status_code)
+                logging.warning("%s from request URL, sleeping 1s", resp.status_code)
                 time.sleep(1)
 
             # deal with the response error
             elif resp.status_code >= 500:
                 errors += 1
                 if errors > 30:
-                    logging.warn("Too many errors from Weibo REST API Server, stop!")
+                    logging.warning("Too many errors from Weibo REST API Server, stop!")
                     resp.raise_for_status()
                 seconds = 60 * errors
-                logging.warn("%s from Weibo REST API Server, sleeping %d", resp.status_code, seconds)
+                logging.warning("%s from Weibo REST API Server, sleeping %d", resp.status_code, seconds)
                 time.sleep(seconds)
             else:
                 resp.raise_for_status()
@@ -263,7 +275,6 @@ class Weiboarc(object):
 
             resp = self.get(friendships_url, **params)
             statuses = resp.json()['statuses'] if 'statuses' in resp.json() else []
-
             if len(statuses) == 0:
                 log.info("no new weibo post matching %s", params)
                 break
@@ -286,16 +297,16 @@ class Weiboarc(object):
             # if rate limit reach
             if r.status_code == 429:
                 seconds = self.wait_time()
-                logging.warn("Rate limit 429 from Weibo API, Sleep %d to try...", seconds)
+                logging.warning("Rate limit 429 from Weibo API, Sleep %d to try...", seconds)
                 time.sleep(seconds)
                 r = self.get(*args, **kwargs)
             return r
-        except APIError, e:
+        except APIError as e:
             # if rate limit reach
             log.error("caught APIError error %s", e)
             if e.error_code in [10022, 10023, 10024]:
                 seconds = self.wait_time()
-                logging.warn("Rate limit %d from Weibo API, Sleep %d to try...", e.error_code, seconds)
+                logging.warning("Rate limit %d from Weibo API, Sleep %d to try...", e.error_code, seconds)
                 time.sleep(seconds)
                 return self.get(*args, **kwargs)
             else:
@@ -323,7 +334,7 @@ class Weiboarc(object):
         """
         try:
             rl = self.rate_limit()
-        except Exception, e:
+        except Exception as e:
             rl = None
 
         if rl:
@@ -340,11 +351,12 @@ class Weiboarc(object):
         log.info("creating client session...")
         try:
             self.client = Client(access_token=self.access_token)
-        except Exception, e:
+        except Exception as e:
             log.error("creating client session error,%s", e)
             raise e
 
-    def _lower_bound(self, weibos, max_id):
+    @staticmethod
+    def _lower_bound(weibos, max_id):
         """
         Finding the lower bound of the position to insert the max weibo id
         for i<left weibos[low]['id']>max_id
@@ -354,14 +366,15 @@ class Weiboarc(object):
         """
         left, right = 0, len(weibos) - 1
         while left <= right:
-            mid = (left + right) / 2
-            if weibos[mid][u'id'] >= max_id:
+            mid = int((left + right) / 2)
+            if weibos[mid]['id'] >= max_id:
                 left = mid + 1
             else:
                 right = mid - 1
         return left
 
-    def _upper_bound(self, weibos, since_id):
+    @staticmethod
+    def _upper_bound(weibos, since_id):
         """
         Finding the upper bound of the position to insert the since weibo id
         for i>right weibos[high]['id']<since_post_id
@@ -371,15 +384,15 @@ class Weiboarc(object):
         """
         left, right = 0, len(weibos) - 1
         while left <= right:
-            mid = (left + right) / 2
-            if weibos[mid][u'id'] > since_id:
+            mid = int((left + right) / 2)
+            if weibos[mid]['id'] > since_id:
                 left = mid + 1
             else:
                 right = mid - 1
         return left
 
 
-class APIError(StandardError):
+class APIError(Exception):
     """
     raise APIError if got failed message from the API not the http error.
     """
@@ -388,7 +401,7 @@ class APIError(StandardError):
         self.error_code = error_code
         self.error = error
         self.request = request
-        StandardError.__init__(self, error)
+        Exception.__init__(self, error)
 
     def __str__(self):
         return 'APIError: %s, %s, Request: %s' % (self.error_code, self.error, self.request)
