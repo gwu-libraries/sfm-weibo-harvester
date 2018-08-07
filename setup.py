@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='sfmweiboharvester',
-    version='2.0.0',
+    version='2.0.1',
     url='https://github.com/gwu-libraries/sfm-weibo-harvester',
     author='Social Feed Manager',
     author_email='sfm@gwu.edu',
