@@ -122,5 +122,5 @@ class TestWeiboErrorStatus(tests.TestCase):
 
     def test_error_json(self):
         table = WeiboStatusTable(self.warc_paths, False, None, None, None)
-        for row in table:
-            self.assertEqual("created_at", row[0])
+        # no rows returned because no statuses in json
+        self.assertEqual(0, len(table))
