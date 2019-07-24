@@ -14,6 +14,8 @@ class WeiboWarcIter(BaseWarcIter):
         return url.startswith("https://api.weibo.com/2")
 
     def _item_iter(self, url, json_obj):
+        if isinstance(json_obj, dict) and ('error' in json_obj):
+            return
         for status in json_obj["statuses"]:
             yield "weibo_status", status["mid"], date_parse(status["created_at"]), status
 
