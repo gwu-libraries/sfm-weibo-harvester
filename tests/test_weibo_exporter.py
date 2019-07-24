@@ -111,3 +111,16 @@ class TestWeiboStatusTableVcr(tests.TestCase):
         self.assertEqual(3, chunk_count)
         # 1+3,1+3,1+1
         self.assertEqual(10, total_count)
+
+
+class TestWeiboErrorStatus(tests.TestCase):
+    def setUp(self):
+        warc_base_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "warcs/3/2017/09/19/16")
+        self.warc_paths = (os.path.join(warc_base_path,
+                                        "287c996639f64bcfaec0137158d531f4-20170919160140561-00000-6509-bd35ec264508"
+                                        "-8264.warc.gz"))
+
+    def test_error_json(self):
+        table = WeiboStatusTable(self.warc_paths, False, None, None, None)
+        for row in table:
+            self.assertEqual("created_at", row[0])
