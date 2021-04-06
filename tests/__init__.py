@@ -8,8 +8,6 @@ try:
 except ImportError:
     WEIBO_ACCESS_TOKEN = os.environ.get("WEIBO_ACCESS_TOKEN")
 
-print("XXXXXX Token is", WEIBO_ACCESS_TOKEN)
-
 test_config_available = True if WEIBO_ACCESS_TOKEN else False
 
 mq_port_available = True
