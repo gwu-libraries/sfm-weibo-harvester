@@ -339,7 +339,7 @@ class TestWeiboHarvesterIntegration(tests.TestCase):
             shutil.rmtree(self.path, ignore_errors=True)
 
     def test_search_timeline(self):
-        self.path = "/sfm-data/collection_set/test_collection/test_3"
+        self.path = "/sfm-collection-set-data/collection_set/test_collection/test_3"
         harvest_msg = {
             "id": "test:3",
             "type": "weibo_timeline",
