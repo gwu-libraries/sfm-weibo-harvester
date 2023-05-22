@@ -1,5 +1,5 @@
 python-dateutil==2.7.5
-requests==2.22.0
+requests==2.31.0
 
 # Testing
 mock==2.0.0
